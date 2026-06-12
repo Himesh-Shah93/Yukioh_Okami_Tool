@@ -1,68 +1,105 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # ============================================================
-# Yukioh_Ōkami — Constants Module
+# Yukioh_Ōkami — SM4 Variant (Tencent custom S-BOX/FK/CK)
 # ============================================================
 
-ZUC_KEY = bytes.fromhex('01010101010101010101010101010101')
-ZUC_IV  = bytes.fromhex('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF')
+from typing import List
+from gmalg.base import BlockCipher
+from gmalg.errors import IncorrectLengthError
+from gmalg.utils import ROL32
 
-RSA_MOD_1 = bytes.fromhex(
-    'CBE8B9F2504050EF9831B719E9A6249A6D238505ADE909BDE78C180DED6072A0C'
-    '3347B8AF4780E1F212D952D82D4BF7F233C1ECA499E1F9D9A85B4FAD759F54BAB'
-    'C1666C5DE411EA9E4B2374425DD6C6F54333BBC8F2610FE6063E4D0D6C21A671A'
-    '8F7C3740555E5DC06D4E1691C456DB4116C0C012BF7B206E8311AAAEC689952BF'
-    '804EF638F09D5822B4117B114208F14DEB459E80CB770E5B0D7978E21F5E6CED4'
-    '999D3583108221A7AB28B960277ADB5690A332784019D9C195BE4EA9EA0A094590'
-    '10F236465DE0D59C3EF7324E954E1118D93EE19F299760C2CDB963CE87973EA5E'
-    'CC9BBE81C27D4C7C8572AC07E9BCEAC9BD72AB7A56A3C0AD736ABCE4')
+_S_BOX = bytes([
+    0x34,0x66,0x25,0x74,0x89,0x78,0xE4,0xA9,0x5A,0x41,0xBC,0x7A,0xD6,0x16,0x21,0x23,
+    0x4D,0x61,0xDA,0x94,0x9B,0xDF,0x13,0x3C,0x69,0x3A,0x31,0x0A,0x5F,0xD7,0x99,0x95,
+    0xF1,0xAE,0x72,0x3D,0x07,0x60,0x24,0xB6,0x98,0xEE,0xC4,0xA2,0x2D,0x88,0xDD,0x8D,
+    0x04,0xEA,0xBB,0x11,0xCA,0x3E,0x5D,0xA1,0xF6,0x3F,0xB0,0x97,0x80,0x47,0x2B,0xA6,
+    0xE6,0xF7,0xD9,0xB1,0x59,0xC0,0x7C,0xBE,0x54,0x28,0xB7,0x7E,0x4F,0xF8,0x43,0x6E,
+    0xA0,0x50,0x0E,0xF5,0x90,0xB8,0xFB,0xA3,0x7B,0x62,0x19,0x46,0x03,0x2A,0xB9,0x8F,
+    0x9F,0x77,0xB4,0x5B,0x83,0x87,0x08,0xEB,0xE2,0x1E,0x42,0xF0,0x0F,0xE8,0x71,0x6A,
+    0x75,0xAD,0x55,0x1F,0xB5,0xAB,0x33,0xFA,0x7F,0x15,0xBD,0x85,0xD8,0x06,0x68,0xB3,
+    0x52,0x30,0x48,0x0B,0x00,0xED,0xEF,0xB2,0x57,0x8E,0xE7,0x6C,0xD5,0xE5,0x2E,0x53,
+    0x82,0x05,0xF9,0x81,0xF4,0x56,0xBF,0x8C,0x4B,0xE3,0xDB,0x4A,0x91,0x4C,0x2C,0xD3,
+    0x40,0x29,0x4E,0x20,0x14,0x36,0x79,0x09,0x6F,0xD1,0x37,0xE0,0x39,0x0C,0x8A,0x92,
+    0x38,0x12,0x35,0x6D,0xE1,0xFD,0x93,0x9A,0x17,0xD4,0xC9,0x9C,0x6B,0x84,0x26,0x9D,
+    0xAF,0x76,0xC1,0x9E,0xD0,0x96,0xC5,0xCB,0xE9,0x73,0x49,0xD2,0xCD,0x64,0xC3,0xC7,
+    0x01,0x7D,0xF3,0xAC,0xFC,0xDE,0xA4,0x44,0x32,0x1B,0xC2,0xBA,0x1C,0x02,0xC6,0x27,
+    0x45,0x8B,0xF2,0x18,0xA7,0x10,0x51,0x1D,0xC8,0xCF,0x63,0xFF,0x2F,0x0D,0x58,0xCE,
+    0x65,0xA5,0xDC,0x1A,0x3B,0x86,0xFE,0x22,0x5C,0xA8,0x5E,0x67,0xAA,0xEC,0x70,0xCC,
+])
 
-RSA_MOD_2 = bytes.fromhex(
-    '7F58E8A39A4DA4E87357DDD650EAA16D3B5CE95B213D1030A662566444796A78A'
-    '84AE9AC3DBFFDE7F41094896696835DAF13B89E6EC2B84963B1B1BAF7151DA245'
-    'C3FBFAE2A6AE18B2684D03F9229DE2C91440F2A3A3BCDE1E5680C16722A88039C'
-    '73560D5D43F4B6562C2EEA5B1D926D86B51108A2643C70FB74D6442CE3A08339B'
-    '8FD8F660AE88129B7AB8C46F2FA58124485CCCB1E987B05A6DA65A01858ED3F89'
-    '905449AE42BB07290FCB9994BF22E26610BCABB9804783A3B9587917F3D97316E'
-    'DDA15C5E13F79066407B55A93B291B68A4AC42A98D6E35FED84B14A792D154E62'
-    '028DDAD20FC301951E5924BE9AD62FB719DD94CC30CAB871BEC4377A8')
+_FK = [0x46970E9C, 0x4BC0685E, 0x59056186, 0xBCA2491E]
 
-SIMPLE1_DECRYPT_KEY = 0x79
-SIMPLE2_DECRYPT_KEY = bytes.fromhex('E55B4ED1')
-SIMPLE2_BLOCK_SIZE  = 16
-
-SM4_SECRET_4   = 'eb691efea914241317a8'
-SM4_SECRET_2   = 'Q0hVTKey$as*1ZFlQCiA'
-SM4_SECRET_NEW = [
-    'xG2qW5lP7lV2iN5fN5pG',
-    'xT1cJ6dL5wC0kK1rB4dK',
-    'qC4jS5bZ6fL5xE6nD4zA',
-    'gD4jQ2aL3bS3lC3xT0iW',
-    'xU1yQ8wE9zY3gZ3bT5aE',
-    'uQ3cO2dX7xY4xU7gH7iS',
-    'gW1fR0jK6wQ4oN0oK1kZ',
-    'aJ4pV7iZ7pU4wP2aC2cZ',
-    'cX6jT3cM2oT3vK0kJ1qN',
-    'iT2vS0cS6yT6cZ1sE1lO',
-    'hM1pH9iY8wM9hT4lN5uJ',
-    'kG6bC8jK0fL0dE4sH4mL',
-    'dB6lB3vE0eZ8wM8rI0aC',
-    'tP7sP7nI9rA2vQ4cV5yQ',
-    'aT0cL1yN4pT3sZ7eM2vY',
-    'uV6fU8fC9zN3mP5dH8mN',
-    'rT6aQ6oZ1yM0gO5tO1aN',
+_CK = [
+    0x000EB92B,0x3A0AE783,0x9E3B5C67,0xADDBDABF,
+    0x7B7484CB,0x49156C63,0xC79AB5E7,0x79EC9CFF,
+    0x1725BEAB,0x2FB89CA3,0x24808AD7,0xDDD28B1F,
+    0x4740DA4B,0xBBC3EA73,0x247B30E7,0x91BE385F,
+    0x0401248B,0x45FCD3A3,0x530B4CE7,0xC68DD35F,
+    0xE3D16C2B,0x4F698C13,0x6B92C747,0x769EFB1F,
+    0x4C73BE9B,0xC942B193,0xAD80D827,0x372FB33F,
+    0x13CB6AAB,0x2BDC0AA3,0x17A4A247,0xD5E96CAF,
 ]
 
-EM_SIMPLE1      = 1
-EM_SIMPLE2      = 16
-EM_SM4_2        = 2
-EM_SM4_4        = 4
-EM_SM4_NEW_BASE = 31
-EM_SM4_NEW_MASK = ~EM_SM4_NEW_BASE
-EM_UNKNOWN_17   = 17
 
-CM_NONE      = 0
-CM_ZLIB      = 1
-CM_ZSTD      = 6
-CM_ZSTD_DICT = 8
-CM_MASK      = 15
+def _BS(X):
+    return ((_S_BOX[(X >> 24) & 0xff] << 24) |
+            (_S_BOX[(X >> 16) & 0xff] << 16) |
+            (_S_BOX[(X >>  8) & 0xff] <<  8) |
+            (_S_BOX[ X        & 0xff]       ))
+
+def _T0(X):
+    X = _BS(X)
+    return X ^ ROL32(X, 2) ^ ROL32(X, 10) ^ ROL32(X, 18) ^ ROL32(X, 24)
+
+def _T1(X):
+    X = _BS(X)
+    return X ^ ROL32(X, 13) ^ ROL32(X, 23)
+
+def _key_expand(key: bytes, rkey: List[int]):
+    K0 = int.from_bytes(key[0:4],  "big") ^ _FK[0]
+    K1 = int.from_bytes(key[4:8],  "big") ^ _FK[1]
+    K2 = int.from_bytes(key[8:12], "big") ^ _FK[2]
+    K3 = int.from_bytes(key[12:16],"big") ^ _FK[3]
+    for i in range(0, 32, 4):
+        K0 = K0 ^ _T1(K1 ^ K2 ^ K3 ^ _CK[i])  ; rkey[i]   = K0
+        K1 = K1 ^ _T1(K2 ^ K3 ^ K0 ^ _CK[i+1]); rkey[i+1] = K1
+        K2 = K2 ^ _T1(K3 ^ K0 ^ K1 ^ _CK[i+2]); rkey[i+2] = K2
+        K3 = K3 ^ _T1(K0 ^ K1 ^ K2 ^ _CK[i+3]); rkey[i+3] = K3
+
+
+class SM4(BlockCipher):
+    @classmethod
+    def key_length(cls)   -> int: return 16
+    @classmethod
+    def block_length(cls) -> int: return 16
+
+    def __init__(self, key: bytes):
+        if len(key) != self.key_length():
+            raise IncorrectLengthError("Key", f"{self.key_length()} bytes", f"{len(key)} bytes")
+        self._key   = key
+        self._rkey  = [0] * 32
+        self._buf   = bytearray()
+        _key_expand(self._key, self._rkey)
+
+    def _process(self, block: bytes, reverse: bool) -> bytes:
+        if len(block) != self.block_length():
+            raise IncorrectLengthError("Block", f"{self.block_length()} bytes", f"{len(block)} bytes")
+        RK = self._rkey
+        X0 = int.from_bytes(block[0:4],  "big")
+        X1 = int.from_bytes(block[4:8],  "big")
+        X2 = int.from_bytes(block[8:12], "big")
+        X3 = int.from_bytes(block[12:16],"big")
+        for i in range(0, 32, 4):
+            ri = (31-i, 30-i, 29-i, 28-i) if reverse else (i, i+1, i+2, i+3)
+            X0 = X0 ^ _T0(X1 ^ X2 ^ X3 ^ RK[ri[0]])
+            X1 = X1 ^ _T0(X2 ^ X3 ^ X0 ^ RK[ri[1]])
+            X2 = X2 ^ _T0(X3 ^ X0 ^ X1 ^ RK[ri[2]])
+            X3 = X3 ^ _T0(X0 ^ X1 ^ X2 ^ RK[ri[3]])
+        buf = self._buf; buf.clear()
+        buf.extend(X3.to_bytes(4,"big")); buf.extend(X2.to_bytes(4,"big"))
+        buf.extend(X1.to_bytes(4,"big")); buf.extend(X0.to_bytes(4,"big"))
+        return bytes(buf)
+
+    def encrypt(self, block: bytes) -> bytes: return self._process(block, False)
+    def decrypt(self, block: bytes) -> bytes: return self._process(block, True)
