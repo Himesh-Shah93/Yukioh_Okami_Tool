@@ -107,17 +107,26 @@ print_final_box() {
 print_banner
 sleep 0.5
 
-section "SYSTEM UPDATE"
+# ─── STEP 1: SYSTEM UPDATE ──────────────────────────────────
+section "STEP 1/7 — SYSTEM UPDATE"
 
 log_info "Updating Termux packages..."
 
-pkg update -y && pkg upgrade -y &>/dev/null &
+(
+    pkg update -y &&
+    pkg upgrade -y
+) > /dev/null 2>&1 &
+
 spinner $! "Updating packages..."
+wait $!
 
 log_ok "System packages updated"
 
-# ─── STEP 1: PYTHON CHECK ───────────────────────────────────
-section "STEP 1/6 — PYTHON CHECK"
+progress_bar 1 7 "System updated"
+sleep 0.3
+
+# ─── STEP 2: PYTHON CHECK ───────────────────────────────────
+section "STEP 2/7 — PYTHON CHECK"
 
 if ! command -v python &>/dev/null; then
     log_info "Python not found. Installing..."
@@ -126,11 +135,11 @@ fi
 
 PY_VER=$(python --version 2>&1 | awk '{print $2}')
 log_ok "Python ${BOLD}$PY_VER${NC} found"
-progress_bar 1 6 "Python verified"
+progress_bar 2 7 "Python verified"
 sleep 0.3
 
-# ─── STEP 2: PIP SETUP ──────────────────────────────────────
-section "STEP 2/6 — PIP SETUP"
+# ─── STEP 3: PIP SETUP ──────────────────────────────────────
+section "STEP 3/7 — PIP SETUP"
 
 if ! command -v pip &>/dev/null; then
     log_info "Installing pip..."
@@ -143,11 +152,11 @@ log_info "Upgrading pip..."
 pip install --upgrade pip &>/dev/null &
 spinner $! "Upgrading pip..."
 log_ok "pip ${BOLD}$PIP_VER${NC} ready"
-progress_bar 2 6 "pip ready"
+progress_bar 3 7 "pip ready"
 sleep 0.3
 
-# ─── STEP 3: BUILD TOOLS ────────────────────────────────────
-section "STEP 3/6 — BUILD TOOLS"
+# ─── STEP 4: BUILD TOOLS ────────────────────────────────────
+section "STEP 4/7 — BUILD TOOLS"
 
 if ! command -v git &>/dev/null; then
     log_info "Installing git + build deps..."
@@ -162,11 +171,11 @@ fi
 
 GIT_VER=$(git --version 2>&1 | awk '{print $3}')
 log_ok "git ${BOLD}$GIT_VER${NC} ready"
-progress_bar 3 6 "Build tools ready"
+progress_bar 4 7 "Build tools ready"
 sleep 0.3
 
-# ─── STEP 4: PYTHON MODULES ─────────────────────────────────
-section "STEP 4/6 — PYTHON MODULES"
+# ─── STEP 5: PYTHON MODULES ─────────────────────────────────
+section "STEP 5/7 — PYTHON MODULES"
 
 MODULES=(
     gmalg
@@ -201,11 +210,11 @@ done
 
 divider
 log_ok "All ${BOLD}$TOTAL${NC} modules installed"
-progress_bar 4 6 "Modules ready"
+progress_bar 5 7 "Modules ready"
 sleep 0.3
 
-# ─── STEP 5: CLONE REPO ─────────────────────────────────────
-section "STEP 5/6 — CLONE REPO"
+# ─── STEP 6: CLONE REPO ─────────────────────────────────────
+section "STEP 6/7 — CLONE REPO"
 
 if [ -d "$HOME/Yukioh_Okami_Tool" ]; then
     log_warn "Old Yukioh_Okami_Tool found"
@@ -232,11 +241,11 @@ log_ok "Tool ready at ${CYAN}~/Yukioh_Okami_Tool${NC}"
 cd "$HOME/Yukioh_Okami_Tool" || exit 1
 chmod +x *
 log_ok "Executable permissions set"
-progress_bar 5 6 "Repo cloned"
+progress_bar 6 7 "Repo cloned"
 sleep 0.3
 
-# ─── STEP 6: GLOBAL COMMAND ─────────────────────────────────
-section "STEP 6/6 — GLOBAL COMMAND"
+# ─── STEP 7: GLOBAL COMMAND ─────────────────────────────────
+section "STEP 7/7 — GLOBAL COMMAND"
 
 CMD_PATH="${PREFIX:-/usr/local}/bin/Yukioh_Okami_Tool"
 
@@ -257,7 +266,7 @@ CMDEOF
 
 chmod +x "$CMD_PATH"
 log_ok "Global command created: ${CYAN}Yukioh_Okami_Tool${NC}"
-progress_bar 6 6 "Installation complete"
+progress_bar 7 7 "Installation complete"
 sleep 0.3
 
 # ─── DONE ───────────────────────────────────────────────────

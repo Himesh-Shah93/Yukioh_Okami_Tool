@@ -580,10 +580,10 @@ def show_banner(auth_data=None, show_menu=False):
 
     console.print(Align.center(f"[bold {ACCENT}]╔{'═'*W}╗[/]"))
     console.print(Align.center(f"[bold {ACCENT}]╠{'═'*W}╣[/]"))
-    console.print(Align.center(row("  [*] STATUS :", status,  status_color)))
-    console.print(Align.center(row("  [-] SERVER :", modname, GOLD)))
-    console.print(Align.center(row("  [-] CREDIT :", credit,  "bright_green")))
-    console.print(Align.center(row("  [-] EXPIRY :", expiry,  ACCENT)))
+    console.print(Align.center(row("  [*] STATUS :", status,  status_color))) 
+    console.print(Align.center(row("  [-] SERVER :", modname, GOLD))) 
+    console.print(Align.center(row("  [-] CREDIT :", credit,  "bright_green"))) 
+    console.print(Align.center(row("  [-] EXPIRY :", expiry,  ACCENT))) 
     console.print(Align.center(f"[bold {ACCENT}]╠{'═'*W}╣[/]"))
     console.print(Align.center(row_center("UNPACK  ·  REPACK  ·  COMPILE  ·   DECOMPILE")))
     console.print(Align.center(f"[bold {ACCENT}]╚{'═'*W}╝[/]"))
@@ -1702,10 +1702,10 @@ if HAS_PAK_DEPS:
 # ============================================================
 # LUA TOOL CORE
 # ============================================================
-#GITHUB_RAW_BASE = YEHA PE APNA GITHUB LINK ADDRESS DALNA HAI JISME HAMNE unluac.jar FILE DOWNLOAD KARKE RAKHA HAI GOOGLE SE AUR RAHI BAAT ISS KE  "_K = bytes.fromhex("112136474657a78d9d8490d8ab008c35261af7e45805b8b31507d02c1e8ff6c8")" TOH MUJHE NHI MALUM LAKIN LAGTA HAI KE YEH GIT TOKEN HAI USS REPOSITORY KA JO GENERAL GIT TOKEN BANAYA HAI SIRF USS REPOSITORY KE LIYE JISKA NAME RAHEGA "UNLUAC_FILE". AUR JO lua53.dll hai WO KYA HAI WO V NHI MALUM LAKIN LAGTA HAI KE YEH unluac.jar KO RUN KARNE KA CODE HAI JO HAR DEVELOPERS KA APNA BANANA PADHTA HAI SHAYAD.
+#GITHUB_RAW_BASE = YEHA PE APNA GITHUB LINK ADDRESS DALNA HAI JISME HAMNE unluac.jar FILE DOWNLOAD KARKE RAKHA HAI YAHA SE "https://sourceforge.net/projects/unluac/" AUR RAHI BAAT ISS KE  "_K = bytes.fromhex("112136474657a78d9d8490d8ab008c35261af7e45805b8b31507d02c1e8ff6c8")" TOH MUJHE NHI MALUM LAKIN LAGTA HAI KE YEH GIT TOKEN HAI USS REPOSITORY KA JO GENERAL GIT TOKEN BANAYA HAI SIRF USS REPOSITORY KE LIYE JISKA NAME RAHEGA "UNLUAC_FILE". AUR JO lua53.dll hai WO KYA HAI WO V NHI MALUM LAKIN LAGTA HAI KE YEH unluac.jar KO RUN KARNE KA CODE HAI JO HAR DEVELOPERS KA APNA BANANA PADHTA HAI SHAYAD.
 
 
-GITHUB_RAW_BASE = "YEHA PE APNA GITHUB LINK ADDRESS DALNA HAI JISME HAMNE unluac.jar FILE DOWNLOAD KARKE RAKHA HAI GOOGLE SE"
+GITHUB_RAW_BASE = "https://raw.githubusercontent.com/Himesh-Shah93/UNLUAC_FILE/main"
 _K = bytes.fromhex("112136474657a78d9d8490d8ab008c35261af7e45805b8b31507d02c1e8ff6c8")
 
 TEMP_DIR = os.path.join(tempfile.gettempdir(), "cache_" + uuid.uuid4().hex)
