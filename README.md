@@ -151,7 +151,7 @@ This tool uses an online activation panel. You will be prompted to enter a valid
 ## 👨‍💻 Developer
 
 Created by **Yukioh_Ōkami**
-Yukioh_Ōkami – Fully developed by @Yukira_12
+– Fully developed by @Yukira_12
 
 ---
 
