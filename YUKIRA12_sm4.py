@@ -6,9 +6,19 @@
 import os
 import subprocess
 import sys
-from colorama import Fore, Style, init
 
-init(autoreset=True)
+try:
+    from colorama import Fore, Style, init
+    init(autoreset=True)
+    HAS_COLORAMA = True
+except ImportError:
+    HAS_COLORAMA = False
+    class _Dummy:
+        def __getattr__(self, name): return ''
+        def __call__(self, *a, **k): pass
+    Fore = _Dummy()
+    Style = _Dummy()
+    init = _Dummy()
 
 LIBRARY = "libUE4.so"
 DATABASE = "YUKIRA12_sm4_keys.txt"
@@ -20,8 +30,14 @@ class ByteSequenceAnalyzer:
 
     def collect_wide_strings(self):
         cmd = ["strings", "-el", self.path]
-        proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
-        return [s.strip() for s in proc.stdout.splitlines() if s.strip()]
+        try:
+            proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
+            return [s.strip() for s in proc.stdout.splitlines() if s.strip()]
+        except FileNotFoundError:
+            print(Fore.YELLOW + "[!] 'strings' command not found. Install binutils, or skipping wide-string scan.")
+            return []
+        except Exception:
+            return []
 
     def collect_embedded_keys(self):
         try:
@@ -55,7 +71,7 @@ class ByteSequenceAnalyzer:
                     if valid and ptr + 1 < len(blob) and blob[ptr] == 0 and blob[ptr + 1] == 0:
                         try:
                             results.add(segment.decode('ascii'))
-                        except:
+                        except (UnicodeDecodeError, ValueError):
                             pass
                     cursor += 1
                 else:
@@ -81,6 +97,8 @@ class SequenceEvaluator:
         return best
 
     def unique_fraction(self, seq):
+        if not seq:
+            return 0.0
         return len(set(seq)) / len(seq)
 
     def is_plausible(self, seq):
@@ -141,9 +159,7 @@ class SequenceEvaluator:
             for k in new:
                 f.write(k + "\n")
 
-        print(Fore.CYAN + "\n[+] SM4_KEY_FOUND:")
-        for k in new:
-            print(f"    {k}")
+        print(Fore.GREEN + f"[*] {len(new)} new keys saved. Database total: {prior + len(new)}")
 
 def main():
     print(Fore.MAGENTA + Style.BRIGHT + ":: YUKIRA12 SM4 KEY FINDER TOOL ::")

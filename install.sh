@@ -58,9 +58,14 @@ progress_bar() {
     local total=$2
     local label=$3
     local width=30
-    local filled=$(( current * width / total ))
-    local empty=$(( width - filled ))
-    local pct=$(( current * 100 / total ))
+    local filled=0
+    local empty=$width
+    local pct=0
+    if [ $total -gt 0 ]; then
+        filled=$(( current * width / total ))
+        empty=$(( width - filled ))
+        pct=$(( current * 100 / total ))
+    fi
     local bar
     bar="${GREEN}"
     for ((i=0; i<filled; i++)); do bar+="█"; done
@@ -118,14 +123,14 @@ sleep 0.3
 
 # STEP 2 (EXACT commands you requested)
 section "STEP 2/6 — INSTALL DEPENDENCIES"
-log_info "Installing python, openjdk-17, lua53..."
+log_info "Installing python, openjdk-17..."
 {
-    pkg install python openjdk-17 lua53 -y
+    pkg install python openjdk-17 -y
 } > /dev/null 2>&1 &
 spinner $! "Installing packages..."
 wait $!
 PY_VER=$(python --version 2>&1 | awk '{print $2}')
-log_ok "Python $PY_VER, Java, Lua installed"
+log_ok "Python $PY_VER, Java installed"
 progress_bar 2 6 "System deps ready"
 sleep 0.3
 

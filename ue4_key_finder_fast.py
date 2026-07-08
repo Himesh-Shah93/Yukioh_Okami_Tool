@@ -17,11 +17,7 @@
 """
 
 import os
-import sys
-import re
-import math
 import time
-import subprocess
 from typing import List, Dict, Tuple, Optional
 from dataclasses import dataclass
 
@@ -136,9 +132,9 @@ class FastKeyFinder:
         if pos != -1:
             results.append(FoundKey(
                 offset=pos,
-                key=pattern,
+                key=b'\x00' * 32,
                 key_type="Pattern",
-                confidence=1.0,
+                confidence=0.5,
                 description=f"{description} at 0x{pos:X}"
             ))
         return results
@@ -171,7 +167,7 @@ class FastKeyFinder:
             if start < self.size and end < self.size:
                 chunk = self.data[start:end]
                 # Look for 32-byte patterns with good entropy
-                for i in range(0, len(chunk) - 32, 64):
+                for i in range(0, len(chunk) - 31, 4):
                     key = chunk[i:i+32]
                     if self._is_good_key(key):
                         results.append(FoundKey(
@@ -205,7 +201,6 @@ class FastKeyFinder:
         results.extend(self.search_known_keys())
         if results:
             print(f"{c(Colors.GREEN, f'   ✅ Found {len(results)} known keys!')}")
-            return results
         
         # 2. Lua headers
         print(f"{c(Colors.DIM, '   ⚡ Searching Lua headers...')}")
@@ -322,7 +317,7 @@ def main():
     if choice == '1':
         filepath = input(f"{c(Colors.CYAN, 'Enter file path: ')}").strip()
         if not filepath:
-            filepath = "/storage/emulated/0/Download/libUE4.so"
+            filepath = "libUE4.so"
             print(f"{c(Colors.DIM, f'   Using default: {filepath}')}")
         scan_file_optimized(filepath, "ue4_keys.txt")
     

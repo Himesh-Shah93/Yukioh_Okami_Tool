@@ -26,10 +26,8 @@ Usage:
 
 import os
 import sys
-import struct
-import re
-import hashlib
 import json
+import math
 import time
 from collections import Counter
 from typing import List, Tuple, Optional, Dict, Any
@@ -165,11 +163,10 @@ class GFPXORKeyFinder:
         for count in counts.values():
             probability = count / length
             if probability > 0:
-                import math
                 entropy -= probability * math.log2(probability)
         return entropy
     
-    def find_in_known_offsets(self) -> List[Tuple[int, bytes]]:
+    def find_in_known_offsets(self) -> List[Tuple[int, bytes, str]]:
         """Search in known offset ranges for GFP"""
         results = []
         ranges = [
@@ -192,7 +189,7 @@ class GFPXORKeyFinder:
                     self.debug_print(f"Found key in {version} at 0x{offset:X}")
         return results
     
-    def find_by_string_patterns(self) -> List[Tuple[int, bytes]]:
+    def find_by_string_patterns(self) -> List[Tuple[int, bytes, str]]:
         """Find key by looking at string patterns"""
         results = []
         patterns = [b'XOR_KEY', b'LuaXOREncryptor', b'xorkey', b'XOR_KEY_DATA']
@@ -580,7 +577,7 @@ def main():
         
         filepath = input(f"{c(Colors.CYAN, '📁 Enter path to libUE4.so: ')}").strip()
         if not filepath:
-            filepath = "/storage/emulated/0/Download/libUE4.so"
+            filepath = "libUE4.so"
             print(f"{c(Colors.DIM, f'   Using default: {filepath}')}")
         
         if not output:

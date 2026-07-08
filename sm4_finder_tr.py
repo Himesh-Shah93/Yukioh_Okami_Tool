@@ -1,6 +1,5 @@
 import sys
 import os
-import time
 from pathlib import Path
 from collections import defaultdict
 
@@ -17,8 +16,12 @@ class Colors:
 
 def draw_progress_bar(current, total, filename, length=25):
     """Ekranda dinamik ilerleme çubuğu ve info gösterir"""
-    percent = ("{0:.1f}").format(100 * (current / float(total)))
-    filled_length = int(length * current // total)
+    if total <= 0:
+        percent = "0.0"
+        filled_length = 0
+    else:
+        percent = ("{0:.1f}").format(100 * (current / float(total)))
+        filled_length = int(length * current // total)
     bar = '█' * filled_length + '-' * (length - filled_length)
     # \r ile satırı başa sarıp güncelliyoruz
     sys.stdout.write(f'\r{Colors.CYAN}[BİLGİ]{Colors.ENDC} {filename[:15]} |{bar}| {percent}% ')
@@ -43,6 +46,7 @@ def is_sm4_4_candidate(s):
 
 def is_sm4_2_candidate(s):
     if len(s) != 20: return False
+    if not all(c.isalnum() or c in '$*' for c in s): return False
     u = sum(1 for c in s if c.isupper())
     l = sum(1 for c in s if c.islower())
     d = sum(1 for c in s if c.isdigit())
@@ -58,7 +62,7 @@ def scan_file_with_bar(filepath):
         target_len = 20
         
         # UTF-16LE araması
-        for i in range(0, total_len - (target_len * 2), 2):
+        for i in range(0, total_len - (target_len * 2) + 1, 2):
             # Her 500.000 byte'da bir barı güncelle (Performans için)
             if i % 500000 == 0:
                 draw_progress_bar(i, total_len, filepath.name)
@@ -118,7 +122,7 @@ def scan_folder_process():
 
 def main():
     while True:
-        os.system('clear')
+        os.system('clear' if os.name != 'nt' else 'cls')
         print(f"{Colors.CYAN}{Colors.BOLD}==================================================")
         print("      SM4 ANAHTAR ARAMA TOOL PUBG MOBİLE RPAD")
         print(f"=================================================={Colors.ENDC}")
