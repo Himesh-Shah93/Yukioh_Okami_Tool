@@ -68,7 +68,7 @@ cd ~/Yukioh_Okami_Tool && python Yukioh_Okami.py
 
 ---
 
-🧭 Usage (Main Menu)
+## 🧭 Usage (Main Menu)
 
 Option Description
 1. Unpack PAK File Select a .pak from PAKS/. Optionally decrypt LUA files automatically.
@@ -78,7 +78,7 @@ Option Description
 5. How To Use In‑app documentation.
 0. Logout & Exit Clear session and exit.
 
-Typical Workflow
+## Typical Workflow
 
 1. Place your .pak in PAKS/.
 2. Unpack (option 1) – files go to unpacked/<pak_name>/.
@@ -89,7 +89,7 @@ Typical Workflow
 
 ---
 
-🔧 Requirements
+## 🔧 Requirements
 
 · Python 3.8+ (installed automatically)
 · Java Runtime (for unluac decompiler)
@@ -99,7 +99,7 @@ The installer handles all of these for Termux.
 
 ---
 
-🛠 Troubleshooting
+## 🛠 Troubleshooting
 
 NameError: name 'Align' is not defined
 
@@ -142,7 +142,7 @@ Java or Lua not found
 
 ---
 
-🔐 License System
+## 🔐 License System
 
 This tool uses an online activation panel. You will be prompted to enter a valid license key on first run. The key is saved locally in config.json for future sessions.
 
@@ -155,16 +155,16 @@ Created by **Yukioh_Ōkami**
 
 ---
 
-⚠️ Disclaimer
+## ⚠️ Disclaimer
 
 This tool is for educational purposes only. Use it at your own risk. The developer is not responsible for any misuse or damage caused by this software.
 
 ---
 
-📜 License
+## 📜 License
 
 This project is proprietary and not open‑source. Redistribution or modification without explicit permission is prohibited.
 
 ---
 
-Enjoy modding! 🎮
+## Enjoy modding! 🎮
