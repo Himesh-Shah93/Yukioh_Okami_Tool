@@ -412,7 +412,7 @@ LUA_COMPILED_DIR   = ANA_DIZIN / 'COMPILED'
 
 AUTH_CONFIG_FILE = ANA_DIZIN / "config.json"
 PANEL_URL = "https://codes-bgmi.rf.gd/op/kuro-panel/connect"
-GAME_NAME = "BGMI/PUBG"
+GAME_NAME = "BGMI — Battlegrounds Mobile India"
 
 _auth_data = {
     "modname": "YUKIOH ŌKAMI TOOL",
