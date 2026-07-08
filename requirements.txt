@@ -1,0 +1,7 @@
+pycryptodome>=3.19
+zstandard>=0.22
+gmalg>=1.0
+requests>=2.31
+rich>=13.7
+psutil>=5.9
+colorama>=0.4

