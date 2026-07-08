@@ -412,7 +412,7 @@ LUA_COMPILED_DIR   = ANA_DIZIN / 'COMPILED'
 
 AUTH_CONFIG_FILE = ANA_DIZIN / "config.json"
 PANEL_URL = "https://codes-bgmi.rf.gd/op/kuro-panel/connect"
-GAME_NAME = "BGMI"
+GAME_NAME = "BGMI/PUBG"
 
 _auth_data = {
     "modname": "YUKIOH ŌKAMI TOOL",
@@ -583,10 +583,10 @@ def show_banner(auth_data=None, show_menu=False):
 
     console.print(Align.center(f"[bold {ACCENT}]╔{'═'*W}╗[/]"))
     console.print(Align.center(f"[bold {ACCENT}]╠{'═'*W}╣[/]"))
-    console.print(Align.center(row("  [*] STATUS :", status,  status_color)))
-    console.print(Align.center(row("  [-] SERVER :", modname, GOLD)))
-    console.print(Align.center(row("  [-] CREDIT :", credit,  "bright_green")))
-    console.print(Align.center(row("  [-] EXPIRY :", expiry,  ACCENT)))
+    console.print(Align.center(row("  [*] STATUS :", status,  status_color))) 
+    console.print(Align.center(row("  [-] SERVER :", modname, GOLD))) 
+    console.print(Align.center(row("  [-] CREDIT :", credit,  "bright_green"))) 
+    console.print(Align.center(row("  [-] EXPIRY :", expiry,  ACCENT))) 
     console.print(Align.center(f"[bold {ACCENT}]╠{'═'*W}╣[/]"))
     console.print(Align.center(row_center("UNPACK  ·  REPACK  ·  COMPILE  ·   DECOMPILE")))
     console.print(Align.center(f"[bold {ACCENT}]╚{'═'*W}╝[/]"))
