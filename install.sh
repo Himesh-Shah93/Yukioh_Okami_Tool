@@ -123,14 +123,14 @@ sleep 0.3
 
 # STEP 2 (EXACT commands you requested)
 section "STEP 2/6 — INSTALL DEPENDENCIES"
-log_info "Installing python, openjdk-17..."
+log_info "Installing python, openjdk-17, lua53..."
 {
-    pkg install python openjdk-17 -y
+    pkg install python openjdk-17 lua53 -y
 } > /dev/null 2>&1 &
 spinner $! "Installing packages..."
 wait $!
 PY_VER=$(python --version 2>&1 | awk '{print $2}')
-log_ok "Python $PY_VER, Java installed"
+log_ok "Python $PY_VER, Java, Lua 5.3 installed"
 progress_bar 2 6 "System deps ready"
 sleep 0.3
 

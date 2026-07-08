@@ -29,7 +29,6 @@ import uuid
 import datetime
 import random
 from collections import defaultdict
-from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import PurePath, Path
 from datetime import datetime
@@ -1341,6 +1340,7 @@ if HAS_PAK_DEPS:
             if entry.encrypted and entry.encryption_method == 17: return
             enc_m  = entry.encryption_method
             comp_m = entry.compression_method
+            Path(file_path).parent.mkdir(parents=True, exist_ok=True)
             with open(file_path, 'wb') as file:
                 if comp_m == CM_NONE:
                     data = self._peek_content(entry.offset, entry.size, enc_m)
@@ -1659,7 +1659,7 @@ if HAS_PAK_DEPS:
 GITHUB_RAW_BASE = "https://raw.githubusercontent.com/DANGERMODVIP/wewe/main"
 _K = bytes.fromhex("112136474657a78d9d8490d8ab008c35261af7e45805b8b31507d02c1e8ff6c8")
 
-TEMP_DIR = os.path.join(tempfile.gettempdir(), "cache_" + uuid.uuid4().hex)
+TEMP_DIR = os.path.join(tempfile.gettempdir(), "yukioh_okami_tools")
 os.makedirs(TEMP_DIR, exist_ok=True)
 JAVA_JAR = os.path.join(TEMP_DIR, "unluac_patched.jar")
 
@@ -1683,11 +1683,7 @@ def _download_tools():
 _download_tools()
 
 def _cleanup_lua_tools():
-    try:
-        for f in [JAVA_JAR]:
-            if os.path.exists(f): os.remove(f)
-        if os.path.exists(TEMP_DIR): os.rmdir(TEMP_DIR)
-    except: pass
+    pass
 
 atexit.register(_cleanup_lua_tools)
 
@@ -1956,16 +1952,6 @@ def _detect_env():
     if os.path.isfile("/usr/bin/pacman"): return "arch"
     return "unknown"
 
-def _luac_available():
-    for cmd in ["luac5.3", "luac",
-                "/data/data/com.termux/files/usr/bin/luac5.3",
-                "/usr/bin/luac5.3", "/usr/local/bin/luac5.3"]:
-        try:
-            r = subprocess.run([cmd, "-v"], capture_output=True, timeout=3)
-            if b"5.3" in r.stdout + r.stderr: return True
-        except Exception: pass
-    return False
-
 def _find_compiler():
     system_paths = ['luac5.3', 'luac', '/usr/bin/luac5.3', '/usr/local/bin/luac5.3',
                     '/data/data/com.termux/files/usr/bin/luac5.3',
@@ -1974,7 +1960,7 @@ def _find_compiler():
         try:
             r = subprocess.run([c, '-v'], capture_output=True, timeout=3)
             if b'5.3' in r.stdout + r.stderr: return 'luac', c
-        except: pass
+        except Exception: pass
     return None, None
 
 def compile_file(src_path, out_path, orig_source_name=None):
@@ -1985,7 +1971,16 @@ def compile_file(src_path, out_path, orig_source_name=None):
 
     ctype, cpath = _find_compiler()
     if ctype is None:
-        return False, "Lua 5.3 compiler not found. Install: pkg install lua53", ''
+        env = _detect_env()
+        if env == 'termux':
+            hint = 'pkg install lua53'
+        elif env == 'debian':
+            hint = 'sudo apt install lua5.3'
+        elif env == 'arch':
+            hint = 'sudo pacman -S lua53'
+        else:
+            hint = 'install Lua 5.3 compiler (luac5.3)'
+        return False, f'Lua 5.3 compiler not found. Install: {hint}', ''
 
     with tempfile.NamedTemporaryFile(suffix='.luac', delete=False) as tf: tmp_out = tf.name
     try:
@@ -2287,12 +2282,14 @@ def main():
                     if not Confirm.ask("  Continue without compile?", default=False):
                         continue
                     also_compile = False
-                    edit_dir = folder / 'edited'
+                    edit_dir = UNPACKED_DIR / folder.name
             else:
-                edit_dir = folder / 'edited'
+                edit_dir = UNPACKED_DIR / folder.name
 
             if not also_compile and not edit_dir.exists():
-                warn(f"No 'edited' subfolder in {folder}"); continue
+                warn(f"Folder not found: {edit_dir}"); continue
+            if not any(edit_dir.rglob('*.lua')):
+                warn(f"No .lua files found in {edit_dir}"); continue
 
             output_pak = REPACKED_DIR / f'{folder.name}.pak'
             console.print(f"  [cyan]Source:[/cyan] {edit_dir}")
