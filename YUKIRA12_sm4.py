@@ -8,6 +8,12 @@ import subprocess
 import sys
 
 try:
+    import db_client
+    HAS_DB = db_client.HAS_DB
+except Exception:
+    HAS_DB = False
+
+try:
     from colorama import Fore, Style, init
     init(autoreset=True)
     HAS_COLORAMA = True
@@ -158,6 +164,10 @@ class SequenceEvaluator:
                 f.write("==== YUKIRA12 SM4 TOOL FINDER====\n")
             for k in new:
                 f.write(k + "\n")
+                if HAS_DB:
+                    db_client.log_found_key(
+                        key_value=k, key_type="SM4",
+                        source_file=LIBRARY, finder_tool="YUKIRA12_sm4")
 
         print(Fore.GREEN + f"[*] {len(new)} new keys saved. Database total: {prior + len(new)}")
 

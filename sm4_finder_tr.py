@@ -3,6 +3,12 @@ import os
 from pathlib import Path
 from collections import defaultdict
 
+try:
+    import db_client
+    HAS_DB = db_client.HAS_DB
+except Exception:
+    HAS_DB = False
+
 # --- Renk Kodları (Hatalar Giderildi) ---
 class Colors:
     HEADER = '\033[95m'
@@ -117,6 +123,10 @@ def scan_folder_process():
                 print(f"\n{Colors.YELLOW}{key_type}:{Colors.ENDC}")
                 for s in secrets:
                     print(f"  {Colors.GREEN}»{Colors.ENDC} '{s}'")
+                    if HAS_DB:
+                        db_client.log_found_key(
+                            key_value=s, key_type=key_type,
+                            source_file=str(folder), finder_tool="sm4_finder_tr")
 
     input(f"\n{Colors.BLUE}Menüye dönmek için Enter'a bas...{Colors.ENDC}")
 

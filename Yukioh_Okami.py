@@ -35,6 +35,8 @@ from datetime import datetime
 from threading import Thread
 from queue import Queue
 
+import db_client
+
 # ============================================================
 # INTERNAL CONSTANTS (formerly const.py)
 # ============================================================
@@ -428,14 +430,27 @@ def verify_key_with_panel(user_key: str, serial: str = None) -> dict:
     try:
         response = requests.post(PANEL_URL, data=payload, timeout=15)
         if response.status_code == 200:
-            return response.json()
+            result = response.json()
+            db_client.log_license_verification(
+                user_key=user_key, hwid=serial,
+                status=result.get('status', False),
+                modname=result.get('modname'), credit=result.get('credit'),
+                expiry=result.get('expiry'), token=result.get('token'),
+                failure_reason=None if result.get('status') else result.get('reason'),
+            )
+            return result
         else:
-            return {'status': False, 'reason': f'HTTP {response.status_code}'}
+            reason = f'HTTP {response.status_code}'
+            db_client.log_license_verification(user_key=user_key, hwid=serial, status=False, failure_reason=reason)
+            return {'status': False, 'reason': reason}
     except requests.exceptions.Timeout:
+        db_client.log_license_verification(user_key=user_key, hwid=serial, status=False, failure_reason='Connection timeout')
         return {'status': False, 'reason': 'Connection timeout'}
     except requests.exceptions.ConnectionError:
+        db_client.log_license_verification(user_key=user_key, hwid=serial, status=False, failure_reason='Cannot reach panel')
         return {'status': False, 'reason': 'Cannot reach panel'}
     except Exception as e:
+        db_client.log_license_verification(user_key=user_key, hwid=serial, status=False, failure_reason=str(e))
         return {'status': False, 'reason': str(e)}
 
 # ============================================================
@@ -2215,6 +2230,10 @@ def main():
     global _auth_data
     _auth_data = auth_data
 
+    db_client.start_tool_session(
+        tool_name="Yukioh_Okami", hwid=get_hwid(),
+        authenticated=True)
+
     if not HAS_PAK_DEPS:
         show_banner(_auth_data, show_menu=False)
         warn(f"PAK dependencies missing: {_PAK_IMPORT_ERROR}")
@@ -2247,10 +2266,19 @@ def main():
                 progress_animation("Loading PAK structure", 0.8)
                 MemoryManager.print_memory_status()
                 pak = TencentPakFile(pak_file)
+                t0 = time.time()
                 pak.dump(UNPACKED_DIR, pak_file.stem, also_decrypt=also_decrypt)
+                duration = int((time.time() - t0) * 1000)
                 pak.close(); MemoryManager.force_gc()
+                db_client.log_pak_operation(
+                    operation="unpack", input_path=str(pak_file),
+                    output_path=str(UNPACKED_DIR / pak_file.stem),
+                    pak_stem=pak_file.stem, status="success", duration_ms=duration)
             except Exception as e:
                 error(f"Failed: {e}"); traceback.print_exc()
+                db_client.log_pak_operation(
+                    operation="unpack", input_path=str(pak_file),
+                    pak_stem=pak_file.stem, status="failed", error_message=str(e))
 
         elif choice == '2':
             if not HAS_PAK_DEPS: error("PAK deps missing"); continue
@@ -2300,10 +2328,19 @@ def main():
                 try:
                     progress_animation("Preparing repack", 0.5)
                     pak = TencentPakFile(PAKS_DIR / f"{folder.name}.pak")
+                    t0 = time.time()
                     pak.repack(str(edit_dir), output_pak, also_compile=also_compile)
+                    duration = int((time.time() - t0) * 1000)
                     pak.close(); MemoryManager.force_gc()
+                    db_client.log_pak_operation(
+                        operation="repack", input_path=str(edit_dir),
+                        output_path=str(output_pak), pak_stem=folder.name,
+                        status="success", duration_ms=duration)
                 except Exception as e:
                     error(f"Repack failed: {e}"); traceback.print_exc()
+                    db_client.log_pak_operation(
+                        operation="repack", input_path=str(edit_dir),
+                        pak_stem=folder.name, status="failed", error_message=str(e))
 
         elif choice == '3':
             section_header("DECRYPT LUA FILES")

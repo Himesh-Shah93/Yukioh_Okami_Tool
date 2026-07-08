@@ -33,6 +33,12 @@ from collections import Counter
 from typing import List, Tuple, Optional, Dict, Any
 from datetime import datetime
 
+try:
+    import db_client
+    HAS_DB = db_client.HAS_DB
+except Exception:
+    HAS_DB = False
+
 # ============================================================
 # CREDITS
 # ============================================================
@@ -497,6 +503,12 @@ def find_gfp_xor_key(filepath: str, output: str = None, debug: bool = False, exp
         print(f"       {c(Colors.CYAN, f'Type:')} {key_type}")
         print(f"       {c(Colors.CYAN, f'Entropy:')} {entropy:.3f}")
         print()
+        if HAS_DB:
+            db_client.log_found_key(
+                key_value=key.hex().upper(), key_type="GFP",
+                source_file=filepath, key_offset=offset,
+                confidence=entropy, description=key_type,
+                finder_tool="gfp_lua_key_finder")
     
     best = max(keys, key=lambda x: x['entropy'])
     print(f"{c(Colors.BOLD + Colors.GREEN, '🏆 BEST MATCH:')}")

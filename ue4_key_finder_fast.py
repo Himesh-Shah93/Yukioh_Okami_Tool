@@ -21,6 +21,12 @@ import time
 from typing import List, Dict, Tuple, Optional
 from dataclasses import dataclass
 
+try:
+    import db_client
+    HAS_DB = db_client.HAS_DB
+except Exception:
+    HAS_DB = False
+
 # ============================================================
 # CREDITS
 # ============================================================
@@ -274,6 +280,12 @@ def scan_file_optimized(filepath: str, output: str = None):
         print(f"  {i:2d}. {c(Colors.GREEN, f'0x{r.offset:08X}')} {c(Colors.YELLOW, key_hex)}")
         print(f"       {c(Colors.CYAN, f'[{r.key_type}]')} {c(Colors.DIM, r.description)}")
         print()
+        if HAS_DB and len(r.key) >= 32:
+            db_client.log_found_key(
+                key_value=key_hex, key_type="XOR",
+                source_file=filepath, key_offset=r.offset,
+                confidence=r.confidence, description=r.description,
+                finder_tool="ue4_key_finder_fast")
     
     # Show the best match
     best = max(results, key=lambda x: x.confidence)
