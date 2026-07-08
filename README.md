@@ -148,8 +148,9 @@ This tool uses an online activation panel. You will be prompted to enter a valid
 
 ---
 
-👨‍💻 Developer
+## 👨‍💻 Developer
 
+Created by **Yukioh_Ōkami**
 Yukioh_Ōkami – Fully developed by @Yukira_12
 
 ---
@@ -167,8 +168,3 @@ This project is proprietary and not open‑source. Redistribution or modificatio
 ---
 
 Enjoy modding! 🎮
-
-
-## Developer
-
-Created by **Yukioh_Ōkami**
