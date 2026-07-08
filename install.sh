@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================
-#  Yukioh_Ōkami — Termux Installer v2.0
+#  Yukioh_Ōkami — Termux Installer v4.5 (Perfect Edition)
 # ============================================================
 
 clear
@@ -45,177 +45,165 @@ progress_bar() {
 }
 
 print_banner() {
-    echo -e "${GREEN}  ╔══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}  ║                                                              ║${NC}"
-    echo -e "${GREEN}  ║   ${WHITE}██╗   ██╗ ██████╗ ████████╗${GREEN}                                ║${NC}"
-    echo -e "${GREEN}  ║   ${WHITE}╚██╗ ██╔╝██╔═══██╗╚══██╔══╝${GREEN}                                ║${NC}"
-    echo -e "${GREEN}  ║   ${WHITE} ╚████╔╝ ██║   ██║   ██║${GREEN}                                   ║${NC}"
-    echo -e "${GREEN}  ║   ${WHITE}  ╚██╔╝  ██║   ██║   ██║${GREEN}                                   ║${NC}"
-    echo -e "${GREEN}  ║   ${WHITE}   ██║   ╚██████╔╝   ██║${GREEN}                                   ║${NC}"
-    echo -e "${GREEN}  ║   ${WHITE}   ╚═╝    ╚═════╝    ╚═╝${GREEN}                                   ║${NC}"
-    echo -e "${GREEN}  ║                                                              ║${NC}"
-    echo -e "${GREEN}  ║      ${CYAN}YUKIOH OKAMI TOOL INSTALLER v2.0${GREEN}                        ║${NC}"
-    echo -e "${GREEN}  ║      ${DIM}PUBG / BGMI PAK MODDING TOOL SETUP${GREEN}                      ║${NC}"
-    echo -e "${GREEN}  ╚══════════════════════════════════════════════════════════════╝${NC}"
+    echo -e "${GREEN}  ╔════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${GREEN}  ║                                                            ║${NC}"
+    echo -e "${GREEN}  ║   ██╗   ██╗██╗   ██╗██╗  ██╗██╗ ██████╗ ██╗  ██╗          ║${NC}"
+    echo -e "${GREEN}  ║   ╚██╗ ██╔╝██║   ██║██║ ██╔╝██║██╔═══██╗██║  ██║          ║${NC}"
+    echo -e "${GREEN}  ║    ╚████╔╝ ██║   ██║█████╔╝ ██║██║   ██║███████║          ║${NC}"
+    echo -e "${GREEN}  ║     ╚██╔╝  ██║   ██║██╔═██╗ ██║██║   ██║██╔══██║          ║${NC}"
+    echo -e "${GREEN}  ║      ██║   ╚██████╔╝██║  ██╗██║╚██████╔╝██║  ██║          ║${NC}"
+    echo -e "${GREEN}  ║      ╚═╝    ╚═════╝ ╚═╝  ╚═╝╚═╝ ╚═════╝ ╚═╝  ╚═╝          ║${NC}"
+    echo -e "${GREEN}  ║                                                            ║${NC}"
+    echo -e "${GREEN}  ║      ${CYAN}YUKIOH OKAMI TOOL INSTALLER v4.5${GREEN}                  ║${NC}"
+    echo -e "${GREEN}  ║      ${DIM}PUBG / BGMI PAK MODDING TOOL SETUP${GREEN}                ║${NC}"
+    echo -e "${GREEN}  ╚════════════════════════════════════════════════════════╝${NC}"
     echo
 }
 
 section() {
     echo
-    echo -e "  ${BLUE}┌─────────────────────────────────────┐${NC}"
+    echo -e "  ${BLUE}┌────────────────────────────────────────────────────┐${NC}"
     echo -e "  ${BLUE}│${NC}  ${BOLD}${WHITE}$1${NC}"
-    echo -e "  ${BLUE}└─────────────────────────────────────┘${NC}"
+    echo -e "  ${BLUE}└────────────────────────────────────────────────────┘${NC}"
 }
 
 log_ok()   { echo -e "  ${GREEN}[✔]${NC}  $1"; }
 log_info() { echo -e "  ${CYAN}[➤]${NC}  $1"; }
 log_warn() { echo -e "  ${YELLOW}[!]${NC}  $1"; }
 log_err()  { echo -e "  ${RED}[✘]${NC}  $1"; }
-divider()  { echo -e "  ${DIM}──────────────────────────────────────${NC}"; }
+divider()  { echo -e "  ${DIM}──────────────────────────────────────────────────${NC}"; }
 
 print_final_box() {
     echo
-    echo -e "${GREEN}  ╔══════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}  ║                                          ║${NC}"
-    echo -e "${GREEN}  ║   ${YELLOW}✔  YUKIOH OKAMI TOOL INSTALLED!${GREEN}        ║${NC}"
-    echo -e "${GREEN}  ║                                          ║${NC}"
-    echo -e "${GREEN}  ╠══════════════════════════════════════════╣${NC}"
-    echo -e "${GREEN}  ║                                          ║${NC}"
-    echo -e "${GREEN}  ║   ${WHITE}HOW TO RUN:${GREEN}                            ║${NC}"
-    echo -e "${GREEN}  ║                                          ║${NC}"
-    echo -e "${GREEN}  ║   ${CYAN}❯  Yukioh_Okami_Tool${GREEN}                   ║${NC}"
-    echo -e "${GREEN}  ║   ${CYAN}❯  python Yukioh_Okami.py${GREEN}              ║${NC}"
-    echo -e "${GREEN}  ╠══════════════════════════════════════════╣${NC}"
-    echo -e "${GREEN}  ║                                          ║${NC}"
-    echo -e "${GREEN}  ║   ${WHITE}INSTALLED AT:${GREEN}                          ║${NC}"
-    echo -e "${GREEN}  ║   ${DIM}~/Yukioh_Okami_Tool/${NC}${GREEN}                   ║${NC}"
-    echo -e "${GREEN}  ║                                          ║${NC}"
-    echo -e "${GREEN}  ║   ${WHITE}GLOBAL CMD:${GREEN}                            ║${NC}"
-    echo -e "${GREEN}  ║   ${DIM}\$PREFIX/bin/Yukioh_Okami_Tool${NC}${GREEN}          ║${NC}"
-    echo -e "${GREEN}  ║                                          ║${NC}"
-    echo -e "${GREEN}  ╠══════════════════════════════════════════╣${NC}"
-    echo -e "${GREEN}  ║                                          ║${NC}"
-    echo -e "${GREEN}  ║   ${RED}⚠  Do NOT run via curl | bash${GREEN}          ║${NC}"
-    echo -e "${GREEN}  ║   ${DIM}Interactive login required${NC}${GREEN}             ║${NC}"
-    echo -e "${GREEN}  ║                                          ║${NC}"
-    echo -e "${GREEN}  ╚══════════════════════════════════════════╝${NC}"
+    echo -e "${GREEN}  ╔════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${GREEN}  ║                                                            ║${NC}"
+    echo -e "${GREEN}  ║   ${YELLOW}✔  YUKIOH OKAMI TOOL INSTALLED SUCCESSFULLY!${GREEN}        ║${NC}"
+    echo -e "${GREEN}  ║                                                            ║${NC}"
+    echo -e "${GREEN}  ║   ${WHITE}HOW TO RUN:${GREEN}                                            ║${NC}"
+    echo -e "${GREEN}  ║     ${CYAN}▶  Yukioh_Okami_Tool${GREEN}                                  ║${NC}"
+    echo -e "${GREEN}  ║     ${CYAN}▶  cd ~/Yukioh_Okami_Tool && python Yukioh_Okami.py${GREEN}  ║${NC}"
+    echo -e "${GREEN}  ║                                                            ║${NC}"
+    echo -e "${GREEN}  ║   ${WHITE}INSTALLED AT:${GREEN}                                        ║${NC}"
+    echo -e "${GREEN}  ║     ${DIM}~/Yukioh_Okami_Tool${NC}${GREEN}                              ║${NC}"
+    echo -e "${GREEN}  ║                                                            ║${NC}"
+    echo -e "${GREEN}  ║   ${WHITE}GLOBAL CMD:${GREEN}                                          ║${NC}"
+    echo -e "${GREEN}  ║     ${DIM}${PREFIX:-/usr/local}/bin/Yukioh_Okami_Tool${NC}${GREEN}         ║${NC}"
+    echo -e "${GREEN}  ║                                                            ║${NC}"
+    echo -e "${GREEN}  ║   ${RED}⚠  Do NOT run via curl | bash${GREEN}                          ║${NC}"
+    echo -e "${GREEN}  ║   ${DIM}Interactive login required${NC}${GREEN}                         ║${NC}"
+    echo -e "${GREEN}  ║                                                            ║${NC}"
+    echo -e "${GREEN}  ╚════════════════════════════════════════════════════════╝${NC}"
     echo
 }
 
-# ═══════════════════════════════════════════
+# ============================================================
+# MAIN INSTALLATION
+# ============================================================
 
 print_banner
 sleep 0.5
 
-# ─── STEP 1: SYSTEM UPDATE ──────────────────────────────────
-section "STEP 1/7 — SYSTEM UPDATE"
-
+# STEP 1: System Update
+section "STEP 1/6 — SYSTEM UPDATE"
 log_info "Updating Termux packages..."
-
-(
-    pkg update -y &&
-    pkg upgrade -y
-) > /dev/null 2>&1 &
-
+{
+    pkg update -y && pkg upgrade -y
+} > /dev/null 2>&1 &
 spinner $! "Updating packages..."
 wait $!
-
 log_ok "System packages updated"
-
-progress_bar 1 7 "System updated"
+progress_bar 1 6 "System updated"
 sleep 0.3
 
-# ─── STEP 2: PYTHON CHECK ───────────────────────────────────
-section "STEP 2/7 — PYTHON CHECK"
-
-if ! command -v python &>/dev/null; then
-    log_info "Python not found. Installing..."
-    pkg install python python-pip -y &>/dev/null
-fi
-
+# STEP 2: Install system deps
+section "STEP 2/6 — INSTALL DEPENDENCIES"
+log_info "Installing python, java, lua, git, clang..."
+{
+    pkg install -y python openjdk-17 lua53 git clang libffi openssl
+} > /dev/null 2>&1 &
+spinner $! "Installing system packages..."
+wait $!
 PY_VER=$(python --version 2>&1 | awk '{print $2}')
-log_ok "Python ${BOLD}$PY_VER${NC} found"
-progress_bar 2 7 "Python verified"
+log_ok "Python $PY_VER, Java, Lua, Git installed"
+progress_bar 2 6 "System deps ready"
 sleep 0.3
 
-# ─── STEP 3: PIP SETUP ──────────────────────────────────────
-section "STEP 3/7 — PIP SETUP"
-
-if ! command -v pip &>/dev/null; then
-    log_info "Installing pip..."
-    python -m ensurepip --upgrade &>/dev/null &
-    spinner $! "Installing pip..."
-fi
-
-PIP_VER=$(pip --version 2>&1 | awk '{print $2}')
+# STEP 3: Upgrade pip
+section "STEP 3/6 — PIP UPGRADE"
 log_info "Upgrading pip..."
-pip install --upgrade pip &>/dev/null &
+{
+    pip install --upgrade pip
+} > /dev/null 2>&1 &
 spinner $! "Upgrading pip..."
-log_ok "pip ${BOLD}$PIP_VER${NC} ready"
-progress_bar 3 7 "pip ready"
+wait $!
+log_ok "pip upgraded"
+progress_bar 3 6 "pip upgraded"
 sleep 0.3
 
-# ─── STEP 4: BUILD TOOLS ────────────────────────────────────
-section "STEP 4/7 — BUILD TOOLS"
-
-if ! command -v git &>/dev/null; then
-    log_info "Installing git + build deps..."
-    (pkg install git clang libffi openssl -y 2>/dev/null || \
-     apt install git -y 2>/dev/null) &
-    spinner $! "Installing build tools..."
-else
-    log_info "Installing build deps (clang, libffi, openssl)..."
-    pkg install clang libffi openssl -y &>/dev/null &
-    spinner $! "Installing build deps..."
-fi
-
-GIT_VER=$(git --version 2>&1 | awk '{print $3}')
-log_ok "git ${BOLD}$GIT_VER${NC} ready"
-progress_bar 4 7 "Build tools ready"
-sleep 0.3
-
-# ─── STEP 5: PYTHON MODULES ─────────────────────────────────
-section "STEP 5/7 — PYTHON MODULES"
+# STEP 4: Python modules
+section "STEP 4/6 — PYTHON MODULES"
 
 MODULES=(
-    gmalg
     pycryptodome
     zstandard
     rich
     requests
+    psutil
     colorama
-    pyfiglet
-    zstd
 )
 
-TOTAL=${#MODULES[@]}
-
 for mod in "${MODULES[@]}"; do
-    printf "  ${CYAN}[➤]${NC}  Installing ${BOLD}%-16s${NC} " "$mod..."
-    pip install "$mod" &>/dev/null &
+    printf "  ${CYAN}[➤]${NC}  Installing ${BOLD}%-14s${NC} " "$mod..."
+    {
+        pip install --no-cache-dir "$mod"
+    } > /dev/null 2>&1 &
     PID=$!
-    sp='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
-    i=0
-    while kill -0 $PID 2>/dev/null; do
-        printf "\b${CYAN}${sp:$i:1}${NC}"
-        i=$(( (i+1) % 10 ))
-        sleep 0.07
-    done
-    wait $PID && printf "\b${GREEN}✔${NC}\n" || {
+    spinner $PID "Installing $mod..."
+    wait $PID
+    if [ $? -eq 0 ]; then
+        printf "\b${GREEN}✔${NC}\n"
+    else
         printf "\b${RED}✘${NC}\n"
-        log_err "Failed: $mod"
-        exit 1
-    }
+        log_err "Failed to install $mod. Trying alternative..."
+        if [ "$mod" = "gmalg" ]; then
+            log_info "Installing gmalg from GitHub..."
+            pip install git+https://github.com/myzhan/gmalg > /dev/null 2>&1 &
+            PID=$!
+            spinner $PID "Installing gmalg from GitHub..."
+            wait $PID
+            [ $? -eq 0 ] && log_ok "gmalg installed from GitHub" || log_err "gmalg still failed. Continuing anyway."
+        else
+            log_err "Manual install may be required later."
+        fi
+    fi
 done
 
+# Install gmalg separately (since it's in MODULES but we handle fallback above)
+# Actually we already included it in the list, but we should explicitly try again if it failed.
+# However the loop above already tried it, so we just need to ensure it's installed.
+# We'll double-check and force GitHub if needed.
+log_info "Ensuring gmalg is installed..."
+if ! python -c "import gmalg" 2>/dev/null; then
+    log_warn "gmalg not found, installing from GitHub..."
+    pip install git+https://github.com/myzhan/gmalg > /dev/null 2>&1 &
+    spinner $! "Installing gmalg from GitHub..."
+    wait $!
+    if python -c "import gmalg" 2>/dev/null; then
+        log_ok "gmalg installed successfully"
+    else
+        log_err "gmalg still not available. Some PAK features may fail."
+    fi
+else
+    log_ok "gmalg already installed"
+fi
+
 divider
-log_ok "All ${BOLD}$TOTAL${NC} modules installed"
-progress_bar 5 7 "Modules ready"
+log_ok "All Python modules processed"
+progress_bar 4 6 "Modules ready"
 sleep 0.3
 
-# ─── STEP 6: CLONE REPO ─────────────────────────────────────
-section "STEP 6/7 — CLONE REPO"
-
+# STEP 5: Clone repo
+section "STEP 5/6 — CLONE REPOSITORY"
 if [ -d "$HOME/Yukioh_Okami_Tool" ]; then
     log_warn "Old Yukioh_Okami_Tool found"
     log_info "Deleting old folder..."
@@ -226,9 +214,7 @@ if [ -d "$HOME/Yukioh_Okami_Tool" ]; then
 fi
 
 log_info "Cloning Yukioh_Okami_Tool..."
-
-git clone https://github.com/Himesh-Shah93/Yukioh_Okami_Tool "$HOME/Yukioh_Okami_Tool" 2>&1 | \
-while IFS= read -r line; do
+git clone https://github.com/Himesh-Shah93/Yukioh_Okami_Tool "$HOME/Yukioh_Okami_Tool" 2>&1 | while IFS= read -r line; do
     echo -e "  ${DIM}$line${NC}"
 done
 
@@ -239,16 +225,14 @@ fi
 
 log_ok "Tool ready at ${CYAN}~/Yukioh_Okami_Tool${NC}"
 cd "$HOME/Yukioh_Okami_Tool" || exit 1
-chmod +x *
+chmod +x *.py
 log_ok "Executable permissions set"
-progress_bar 6 7 "Repo cloned"
+progress_bar 5 6 "Repo cloned"
 sleep 0.3
 
-# ─── STEP 7: GLOBAL COMMAND ─────────────────────────────────
-section "STEP 7/7 — GLOBAL COMMAND"
-
+# STEP 6: Global command
+section "STEP 6/6 — GLOBAL COMMAND"
 CMD_PATH="${PREFIX:-/usr/local}/bin/Yukioh_Okami_Tool"
-
 cat > "$CMD_PATH" << 'CMDEOF'
 #!/bin/bash
 
@@ -256,18 +240,18 @@ cd "$HOME/Yukioh_Okami_Tool" || exit 1
 
 if [ -f "Yukioh_Okami.py" ]; then
     python Yukioh_Okami.py
-elif [ -f "Yukioh_Okami_Tool" ]; then
-    ./Yukioh_Okami_Tool
 else
-    echo "Tool entry file not found!"
+    echo "Yukioh_Okami.py not found!"
     exit 1
 fi
 CMDEOF
 
 chmod +x "$CMD_PATH"
 log_ok "Global command created: ${CYAN}Yukioh_Okami_Tool${NC}"
-progress_bar 7 7 "Installation complete"
+progress_bar 6 6 "Installation complete"
 sleep 0.3
 
-# ─── DONE ───────────────────────────────────────────────────
+# ============================================================
+# DONE
+# ============================================================
 print_final_box
