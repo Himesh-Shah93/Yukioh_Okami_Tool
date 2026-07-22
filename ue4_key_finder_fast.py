@@ -9,10 +9,10 @@
 ║                         ⚡ FAST VERSION ⚡                      ║
 ║                      (< 1 minute scan)                         ║
 ║                                                                 ║
-║  ⚔️ HIMESHxSlayr | Created by Himesh Shah                      ║
-║  🔥 Designed by HIMESHxSlayr                                   ║
-║  👑 HIMESHxSlayr Studios                                       ║
-║  © HIMESHxSlayr | All Rights Reserved                         ║
+║  ⚔️ Yukioh Ōkami | Created by @Yukira_12                      ║
+║  🔥 Designed by Yukioh Ōkami                                   ║
+║  👑 Yukioh Ōkami Studios                                       ║
+║  © Yukioh Ōkami | All Rights Reserved                         ║
 ╚═══════════════════════════════════════════════════════════════════╝
 """
 
@@ -31,22 +31,22 @@ except Exception:
 # CREDITS
 # ============================================================
 
-__author__ = "HIMESHxSlayr (Himesh Shah)"
-__copyright__ = "© HIMESHxSlayr"
+__author__ = "Yukioh Ōkami (@Yukira_12)"
+__copyright__ = "© Yukioh Ōkami"
 __version__ = "2.0"
 __tool_name__ = "UE4 AES/XOR Key Finder"
 
 CREDITS = """
 ╔═══════════════════════════════════════════════════════════════════╗
 ║                                                                   ║
-║              ⚔️ HIMESHxSlayr presents...                         ║
+║              ⚔️ Yukioh Ōkami presents...                         ║
 ║              🚀 UE4 Key Finder Tool                             ║
 ║                                                                   ║
-║           Created & Developed by Himesh Shah                     ║
-║              🔥 HIMESHxSlayr 🔥                                 ║
+║           Created & Developed by @Yukira_12                     ║
+║              🔥 Yukioh Ōkami 🔥                                 ║
 ║                                                                   ║
-║           © HIMESHxSlayr | All Rights Reserved                  ║
-║           👑 HIMESHxSlayr Studios                               ║
+║           © Yukioh Ōkami | All Rights Reserved                  ║
+║           👑 Yukioh Ōkami Studios                               ║
 ║                                                                   ║
 ╚═══════════════════════════════════════════════════════════════════╝
 """
@@ -228,8 +228,8 @@ def print_banner():
 {c(Colors.CYAN, '║')}  {c(Colors.BOLD + Colors.MAGENTA, '🔑 ANDROID UE4 AES/XOR KEY FINDER v2.0')}  {c(Colors.CYAN, '║')}
 {c(Colors.CYAN, '║')}  {c(Colors.GREEN, '⚡ FAST VERSION - < 1 minute scan')}  {c(Colors.CYAN, '║')}
 {c(Colors.CYAN, '║')}  {c(Colors.YELLOW, '🇨🇳 Game for Peace / PUBG / BGMI')}  {c(Colors.CYAN, '║')}
-{c(Colors.CYAN, '║')}  {c(Colors.BOLD + Colors.WHITE, '⚔️ HIMESHxSlayr | Created by Himesh Shah')}  {c(Colors.CYAN, '║')}
-{c(Colors.CYAN, '║')}  {c(Colors.DIM, '© HIMESHxSlayr | All Rights Reserved')}  {c(Colors.CYAN, '║')}
+{c(Colors.CYAN, '║')}  {c(Colors.BOLD + Colors.WHITE, '⚔️ Yukioh Ōkami | Created by @Yukira_12')}  {c(Colors.CYAN, '║')}
+{c(Colors.CYAN, '║')}  {c(Colors.DIM, '© Yukioh Ōkami | All Rights Reserved')}  {c(Colors.CYAN, '║')}
 {c(Colors.CYAN, '╚' + '═'*60 + '╝')}
     """)
 
@@ -340,5 +340,5 @@ def main():
         print(f"{c(Colors.RED, '❌ Invalid choice')}")
 
 if __name__ == "__main__":
-    print(f"\n{c(Colors.DIM, '🔥 Powered by HIMESHxSlayr')}")
+    print(f"\n{c(Colors.DIM, '🔥 Powered by Yukioh Ōkami')}")
     main()
