@@ -12,10 +12,10 @@
 ║    ✅ Exports in multiple formats                               ║
 ║    ✅ Tests key on sample data                                  ║
 ║                                                                 ║
-║  ⚔️ HIMESHxSlayr | Created by Himesh Shah                      ║
-║  🔥 Designed by HIMESHxSlayr                                   ║
-║  👑 HIMESHxSlayr Studios                                       ║
-║  © HIMESHxSlayr | All Rights Reserved                         ║
+║  ⚔️ Yukioh Ōkami | Created by @Yukira_12                      ║
+║  🔥 Designed by Yukioh Ōkami                                   ║
+║  👑 Yukioh Ōkami Studios                                       ║
+║  © Yukioh Ōkami | All Rights Reserved                         ║
 ╚═══════════════════════════════════════════════════════════════════╝
 
 Usage:
@@ -43,22 +43,22 @@ except Exception:
 # CREDITS
 # ============================================================
 
-__author__ = "HIMESHxSlayr (Himesh Shah)"
-__copyright__ = "© HIMESHxSlayr"
+__author__ = "Yukioh Ōkami (@Yukira_12)"
+__copyright__ = "© Yukioh Ōkami"
 __version__ = "2.0"
 __tool_name__ = "Game for Peace Lua XOR Key Finder"
 
 CREDITS = """
 ╔═══════════════════════════════════════════════════════════════════╗
 ║                                                                   ║
-║              ⚔️ HIMESHxSlayr presents...                         ║
+║              ⚔️ Yukioh Ōkami presents...                         ║
 ║              🎮 GFP Lua XOR Key Finder                          ║
 ║                                                                   ║
-║           Created & Developed by Himesh Shah                     ║
-║              🔥 HIMESHxSlayr 🔥                                 ║
+║           Created & Developed by @Yukira_12                     ║
+║              🔥 Yukioh Ōkami 🔥                                 ║
 ║                                                                   ║
-║           © HIMESHxSlayr | All Rights Reserved                  ║
-║           👑 HIMESHxSlayr Studios                               ║
+║           © Yukioh Ōkami | All Rights Reserved                  ║
+║           👑 Yukioh Ōkami Studios                               ║
 ║                                                                   ║
 ╚═══════════════════════════════════════════════════════════════════╝
 """
@@ -314,8 +314,8 @@ class ResultSaver:
             f.write("-- GAME FOR PEACE LUA XOR KEY\n")
             f.write(f"-- Found at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
             f.write("-- ============================================================\n")
-            f.write("-- 🔥 HIMESHxSlayr | Created by Himesh Shah\n")
-            f.write("-- © HIMESHxSlayr | All Rights Reserved\n")
+            f.write("-- 🔥 Yukioh Ōkami | Created by @Yukira_12\n")
+            f.write("-- © Yukioh Ōkami | All Rights Reserved\n")
             f.write("-- ============================================================\n\n")
             
             f.write("-- BEST KEY (Recommended)\n")
@@ -338,8 +338,8 @@ class ResultSaver:
             f.write("# GAME FOR PEACE LUA XOR KEY\n")
             f.write(f"# Found at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
             f.write("# ============================================================\n")
-            f.write("# 🔥 HIMESHxSlayr | Created by Himesh Shah\n")
-            f.write("# © HIMESHxSlayr | All Rights Reserved\n")
+            f.write("# 🔥 Yukioh Ōkami | Created by @Yukira_12\n")
+            f.write("# © Yukioh Ōkami | All Rights Reserved\n")
             f.write("# ============================================================\n\n")
             
             f.write("# BEST KEY (Recommended)\n")
@@ -362,8 +362,8 @@ class ResultSaver:
             f.write("# GAME FOR PEACE LUA XOR KEY (HEX)\n")
             f.write(f"# Found at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
             f.write("# ============================================================\n")
-            f.write("# 🔥 HIMESHxSlayr | Created by Himesh Shah\n")
-            f.write("# © HIMESHxSlayr | All Rights Reserved\n")
+            f.write("# 🔥 Yukioh Ōkami | Created by @Yukira_12\n")
+            f.write("# © Yukioh Ōkami | All Rights Reserved\n")
             f.write("# ============================================================\n\n")
             
             f.write("# BEST KEY (Recommended)\n")
@@ -384,8 +384,8 @@ class ResultSaver:
         """Save in JSON format"""
         output = {
             "tool": "Game for Peace Lua XOR Key Finder",
-            "author": "HIMESHxSlayr (Himesh Shah)",
-            "copyright": "© HIMESHxSlayr",
+            "author": "Yukioh Ōkami (@Yukira_12)",
+            "copyright": "© Yukioh Ōkami",
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "best_key": {
                 "offset": f"0x{best_key['offset']:08X}",
@@ -413,8 +413,8 @@ class ResultSaver:
             f.write("GAME FOR PEACE LUA XOR KEY FINDER RESULTS\n")
             f.write(f"Found at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
             f.write("=" * 60 + "\n")
-            f.write("⚔️ HIMESHxSlayr | Created by Himesh Shah\n")
-            f.write("© HIMESHxSlayr | All Rights Reserved\n")
+            f.write("⚔️ Yukioh Ōkami | Created by @Yukira_12\n")
+            f.write("© Yukioh Ōkami | All Rights Reserved\n")
             f.write("=" * 60 + "\n\n")
             
             f.write("BEST KEY (Recommended to use this):\n")
@@ -439,8 +439,8 @@ class ResultSaver:
             f.write("\n" + "=" * 60 + "\n")
             f.write(f"Total keys found: {len(keys)}\n")
             f.write("=" * 60 + "\n")
-            f.write("\n🔥 Powered by HIMESHxSlayr\n")
-            f.write("👑 HIMESHxSlayr Studios\n")
+            f.write("\n🔥 Powered by Yukioh Ōkami\n")
+            f.write("👑 Yukioh Ōkami Studios\n")
 
 # ============================================================
 # MAIN FUNCTIONS
@@ -454,8 +454,8 @@ def print_banner():
 {c(Colors.CYAN, '║')}  {c(Colors.YELLOW, '      Find PATCHED/CHANGED XOR Key')}  {c(Colors.CYAN, '║')}
 {c(Colors.CYAN, '║')}  {c(Colors.RED, '      Old key no longer works!')}  {c(Colors.CYAN, '║')}
 {c(Colors.CYAN, '║')}  {c(Colors.BLUE, '      ✅ Saves results to file')}  {c(Colors.CYAN, '║')}
-{c(Colors.CYAN, '║')}  {c(Colors.BOLD + Colors.WHITE, '⚔️ HIMESHxSlayr | Created by Himesh Shah')}  {c(Colors.CYAN, '║')}
-{c(Colors.CYAN, '║')}  {c(Colors.DIM, '© HIMESHxSlayr | All Rights Reserved')}  {c(Colors.CYAN, '║')}
+{c(Colors.CYAN, '║')}  {c(Colors.BOLD + Colors.WHITE, '⚔️ Yukioh Ōkami | Created by @Yukira_12')}  {c(Colors.CYAN, '║')}
+{c(Colors.CYAN, '║')}  {c(Colors.DIM, '© Yukioh Ōkami | All Rights Reserved')}  {c(Colors.CYAN, '║')}
 {c(Colors.CYAN, '╚' + '═'*60 + '╝')}
     """)
 
@@ -603,5 +603,5 @@ def main():
     find_gfp_xor_key(filepath, output, debug, export_format)
 
 if __name__ == "__main__":
-    print(f"\n{c(Colors.DIM, '🔥 Powered by HIMESHxSlayr')}")
+    print(f"\n{c(Colors.DIM, '🔥 Powered by Yukioh Ōkami')}")
     main()
