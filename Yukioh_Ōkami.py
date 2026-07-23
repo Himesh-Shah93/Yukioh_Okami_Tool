@@ -2745,7 +2745,7 @@ def repack_menu(folder_type: str):
 def show_type_menu(folder_type: str):
     while True:
         clear_screen()
-        show_banner()
+        show_banner(_auth_data)
         console.print(Panel(f"""
 [bold cyan]{folder_type} TOOL[/bold cyan]
 [bold cyan]──────────────────────────────[/bold cyan]
@@ -3416,7 +3416,7 @@ def auto_master_baltic_landscape_hex():
 def auto_configuration_menu():
     while True:
         clear_screen()
-        show_banner()
+        show_banner(_auth_data)
         console.print(Panel(f"""
 [bold cyan]AUTO CONFIGURATION[/bold cyan]
 [bold cyan]──────────────────────────────[/bold cyan]
@@ -3544,7 +3544,7 @@ def _fps_run(game_label: str, game_dir: Path, user_model: str):
 def handle_auto_120fps():
     while True:
         clear_screen()
-        show_banner()
+        show_banner(_auth_data)
         bgmi_input_ok = any((FPS_ROOT / 'BGMI' / 'INPUT_PAK').glob('*.pak'))
         pubg_input_ok = any((FPS_ROOT / 'PUBG' / 'INPUT_PAK').glob('*.pak'))
         def _tick(ok):
@@ -3742,7 +3742,7 @@ def ar_make_antireset():
 def handle_antireset_tool():
     while True:
         clear_screen()
-        show_banner()
+        show_banner(_auth_data)
         info = _ar_load_json()
         unzipped = info.get('unzipped', False)
         obb_name = info.get('obb_name', '—')
@@ -3881,7 +3881,7 @@ def _ep_show_result(rows, title, ok, fail):
 def handle_encrypt_pak_tool():
     while True:
         clear_screen()
-        show_banner()
+        show_banner(_auth_data)
         console.print(Panel(f"""
 [bold cyan]ENCRYPT & DECRYPT OBB[/bold cyan]
 [bold cyan]──────────────────────────────[/bold cyan]
@@ -4137,7 +4137,7 @@ def search_text_in_splitted_files():
 def file_split_merge_menu():
     while True:
         clear_screen()
-        show_banner()
+        show_banner(_auth_data)
         console.print(Panel(f"""
 [bold cyan]SPLIT / MERGE FILES[/bold cyan]
 [bold cyan]──────────────────────────────[/bold cyan]
