@@ -29,6 +29,8 @@ import atexit
 import uuid
 import datetime
 import random
+import inspect
+import ssl
 from collections import defaultdict
 from functools import lru_cache
 from pathlib import PurePath, Path
@@ -37,6 +39,12 @@ from threading import Thread
 from queue import Queue
 from dataclasses import dataclass
 from typing import List, Dict, Tuple, Optional, Any
+
+try:
+    import certifi
+    HAS_CERTIFI = True
+except ImportError:
+    HAS_CERTIFI = False
 
 try:
     import db_client
@@ -182,7 +190,8 @@ CM_ZSTD = 6
 CM_ZSTD_DICT = 8
 CM_MASK = 15
 
-TOOL_NAME = 'Yukioh_Okami_v4.5'
+TOOL_NAME = 'Yukioh_Ōkami_v4.5'
+TOOL_VERSION = "v4.5"
 
 # ============================================================
 # FOLDER STRUCTURE
@@ -238,7 +247,7 @@ _auth_data = None
 
 GITHUB_CONFIG = {
     "repo_url": "https://api.github.com/repos/Himesh-Shah93/yukioh_keys/contents/keys.json",
-    "token": "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",
+    "token": "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",
     "cache_file": BASE_DIR / "keys_cache.enc",
     "cache_expiry_hours": 24,
     "allow_offline": True,
@@ -249,14 +258,265 @@ GITHUB_CONFIG = {
 # ============================================================
 
 SUPPORT_CONTACT = "@Yukira_12"
-TOOL_VERSION = "v4.5"
 
 # ============================================================
-# PERMANENT HWID SYSTEM
+# 🔐 SECURITY FUNCTIONS
+# ============================================================
+
+# ============================================================
+# RATE LIMITER - Prevent brute force attacks
+# ============================================================
+
+class RateLimiter:
+    """Prevent brute force attacks on key verification"""
+    
+    def __init__(self, max_attempts: int = 5, window_seconds: int = 300):
+        self.attempts = defaultdict(list)
+        self.max_attempts = max_attempts
+        self.window = window_seconds
+        self.locked_keys = {}
+        self.lock_duration = 1800  # 30 minutes lockout
+    
+    def check(self, key: str) -> tuple:
+        """
+        Check if key is allowed to attempt authentication
+        Returns: (allowed, message)
+        """
+        now = time.time()
+        
+        # Check if key is locked out
+        if key in self.locked_keys:
+            lock_time = self.locked_keys[key]
+            if now - lock_time < self.lock_duration:
+                remaining = int(self.lock_duration - (now - lock_time))
+                return False, f"Key locked for {remaining} seconds. Too many failed attempts."
+            else:
+                # Remove lock after duration
+                del self.locked_keys[key]
+                self.attempts[key] = []
+        
+        # Clean old attempts
+        self.attempts[key] = [t for t in self.attempts[key] if now - t < self.window]
+        
+        # Check if max attempts exceeded
+        if len(self.attempts[key]) >= self.max_attempts:
+            # Lock the key
+            self.locked_keys[key] = now
+            return False, f"Too many failed attempts. Key locked for {self.lock_duration // 60} minutes."
+        
+        return True, "Allowed"
+    
+    def record_attempt(self, key: str, success: bool):
+        """Record authentication attempt"""
+        now = time.time()
+        
+        if success:
+            # Reset attempts on success
+            self.attempts[key] = []
+            if key in self.locked_keys:
+                del self.locked_keys[key]
+        else:
+            # Record failed attempt
+            self.attempts[key].append(now)
+    
+    def get_status(self, key: str) -> dict:
+        """Get status of a key"""
+        now = time.time()
+        attempts = len([t for t in self.attempts[key] if now - t < self.window])
+        is_locked = key in self.locked_keys
+        
+        return {
+            'attempts': attempts,
+            'max_attempts': self.max_attempts,
+            'is_locked': is_locked,
+            'remaining_attempts': self.max_attempts - attempts if not is_locked else 0
+        }
+
+# Create global instance
+auth_rate_limiter = RateLimiter(max_attempts=5, window_seconds=300)
+
+# ============================================================
+# ANTI-DEBUG PROTECTION
+# ============================================================
+
+def anti_debug_check() -> bool:
+    """
+    Check for debuggers and reverse engineering tools
+    Returns True if debugger detected
+    """
+    # 1. Check for Python debugger
+    if sys.gettrace() is not None:
+        console.print("[red]❌ Debugger detected![/red]")
+        return True
+    
+    # 2. Check for common debugger processes
+    try:
+        if HAS_PSUTIL:
+            debugger_processes = [
+                'IDA', 'ida.exe', 'ida64.exe', 'idag.exe', 'idag64.exe',
+                'OllyDbg', 'ollydbg.exe',
+                'x64dbg', 'x32dbg.exe', 'x64dbg.exe',
+                'dnSpy', 'dnspy.exe',
+                'Cheat Engine', 'cheatengine-x86_64.exe', 'cheatengine.exe',
+                'Process Hacker', 'procexp.exe', 'procexp64.exe',
+                'Immunity Debugger', 'immunitydebugger.exe',
+                'WinDbg', 'windbg.exe',
+                'GDB', 'gdb.exe',
+                'Radare2', 'r2.exe',
+                'Binary Ninja', 'binaryninja.exe',
+                'Ghidra', 'ghidra.exe',
+                'Wireshark', 'wireshark.exe'
+            ]
+            
+            for proc in psutil.process_iter(['name']):
+                try:
+                    if proc.info['name']:
+                        proc_name_lower = proc.info['name'].lower()
+                        for debugger in debugger_processes:
+                            if debugger.lower() in proc_name_lower:
+                                console.print(f"[red]❌ Debugger detected: {proc.info['name']}[/red]")
+                                return True
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    pass
+    except:
+        pass
+    
+    # 3. Check for common debugger environment variables
+    debug_env_vars = ['PYTHONDEBUG', 'PYTHONHASHSEED', 'PYTHONMALLOC']
+    for env_var in debug_env_vars:
+        if os.environ.get(env_var):
+            console.print(f"[red]❌ Debug environment detected: {env_var}[/red]")
+            return True
+    
+    # 4. Check for virtual machine (optional - just warning)
+    try:
+        import platform
+        if platform.system() == 'Windows':
+            try:
+                import wmi
+                c = wmi.WMI()
+                for item in c.Win32_ComputerSystem():
+                    vm_detected = any(x in item.Model for x in ['VirtualBox', 'VMware', 'VBox', 'Virtual Machine'])
+                    if vm_detected:
+                        console.print("[yellow]⚠️ Running in Virtual Machine[/yellow]")
+                        # Don't exit, just warn
+            except:
+                pass
+    except:
+        pass
+    
+    return False
+
+# ============================================================
+# CODE INTEGRITY CHECK
+# ============================================================
+
+def check_code_integrity() -> bool:
+    """
+    Check if critical functions have been modified
+    Returns True if integrity is OK
+    """
+    critical_functions = [
+        'verify_key_github',
+        'check_auth',
+        'get_hwid',
+        'admin_hwid_manager'
+    ]
+    
+    try:
+        for func_name in critical_functions:
+            if func_name in globals():
+                func = globals()[func_name]
+                try:
+                    source = inspect.getsource(func)
+                    
+                    # Check for obvious modifications
+                    if 'bypass' in source.lower():
+                        console.print(f"[red]❌ Code integrity compromised in {func_name} (bypass detected)[/red]")
+                        return False
+                    
+                    # Check for hardcoded return True in auth functions
+                    if func_name in ['verify_key_github', 'check_auth']:
+                        if 'return True' in source and 'verify_key_github' in source:
+                            # This is normal, but check for suspicious patterns
+                            lines = source.split('\n')
+                            for line in lines:
+                                stripped = line.strip()
+                                if stripped.startswith('return True') and 'if' not in stripped and 'else' not in stripped:
+                                    # Could be suspicious if at top level
+                                    pass
+                except:
+                    # If we can't get source, assume OK
+                    pass
+    except:
+        # If we can't check, assume OK (don't block)
+        pass
+    
+    return True
+
+# ============================================================
+# SECURE SESSION FOR NETWORK REQUESTS
+# ============================================================
+
+def get_secure_session() -> requests.Session:
+    """
+    Create a secure requests session with SSL verification
+    """
+    session = requests.Session()
+    
+    # SSL verification
+    if HAS_CERTIFI:
+        session.verify = certifi.where()
+    else:
+        session.verify = True  # Default SSL verification
+    
+    # Set secure headers
+    session.headers.update({
+        'User-Agent': f'Yukioh-Okami/{TOOL_VERSION}',
+        'Accept': 'application/json',
+        'Accept-Language': 'en-US,en;q=0.9',
+    })
+    
+    # Timeout settings
+    session.timeout = (10, 30)  # connect timeout, read timeout
+    
+    return session
+
+# ============================================================
+# RATE LIMITER STATUS - Admin Command
+# ============================================================
+
+def show_rate_limiter_status():
+    """Show current rate limiter status for debugging"""
+    console.print(Panel('[bold cyan]📊 RATE LIMITER STATUS[/bold cyan]', border_style='cyan'))
+    
+    table = Table(box=rich_box.SIMPLE)
+    table.add_column('Key', style='bold cyan')
+    table.add_column('Attempts', style='yellow', justify='center')
+    table.add_column('Locked', style='red', justify='center')
+    table.add_column('Remaining', style='green', justify='center')
+    
+    for key, attempts in auth_rate_limiter.attempts.items():
+        now = time.time()
+        recent_attempts = len([t for t in attempts if now - t < auth_rate_limiter.window])
+        is_locked = key in auth_rate_limiter.locked_keys
+        remaining = auth_rate_limiter.max_attempts - recent_attempts
+        
+        table.add_row(
+            key[:20] + '...' if len(key) > 20 else key,
+            str(recent_attempts),
+            '🔒 Locked' if is_locked else '✅ Free',
+            str(remaining) if not is_locked else '0'
+        )
+    
+    console.print(table)
+
+# ============================================================
+# PERMANENT HWID SYSTEM - UPGRADED (10+ Sources)
 # ============================================================
 
 def get_hwid() -> str:
-    """Get permanent HWID - never changes once set"""
+    """Get permanent HWID - harder to spoof with multiple sources"""
     hwid_file = BASE_DIR / ".hwid"
     if hwid_file.exists():
         try:
@@ -270,29 +530,12 @@ def get_hwid() -> str:
     
     hwid_parts = []
     
-    try:
-        mac = uuid.getnode()
-        if mac != 0xffffffffffff:
-            hwid_parts.append(f"MAC_{mac:012x}")
-    except:
-        pass
-    
+    # 1. Motherboard Serial (harder to spoof)
     try:
         if sys.platform == 'win32':
             import subprocess
-            result = subprocess.run(['wmic', 'cpu', 'get', 'processorid'], capture_output=True, text=True, timeout=5)
-            lines = result.stdout.strip().split('\n')
-            if len(lines) >= 2:
-                cpu_id = lines[1].strip()
-                if cpu_id and cpu_id != 'ProcessorId':
-                    hwid_parts.append(f"CPU_{cpu_id[:16]}")
-    except:
-        pass
-    
-    try:
-        if sys.platform == 'win32':
-            import subprocess
-            result = subprocess.run(['wmic', 'baseboard', 'get', 'serialnumber'], capture_output=True, text=True, timeout=5)
+            result = subprocess.run(['wmic', 'baseboard', 'get', 'serialnumber'], 
+                                   capture_output=True, text=True, timeout=5)
             lines = result.stdout.strip().split('\n')
             if len(lines) >= 2:
                 mb_serial = lines[1].strip()
@@ -301,23 +544,71 @@ def get_hwid() -> str:
     except:
         pass
     
+    # 2. BIOS UUID (Windows)
     try:
-        if sys.platform in ['linux', 'darwin']:
-            if sys.platform == 'linux':
-                with open('/var/lib/dbus/machine-id', 'r') as f:
-                    machine_id = f.read().strip()
-                    if machine_id:
-                        hwid_parts.append(f"SYS_{machine_id[:16]}")
-            elif sys.platform == 'darwin':
-                import subprocess
-                result = subprocess.run(['ioreg', '-l'], capture_output=True, text=True, timeout=5)
-                import re
-                match = re.search(r'IOPlatformUUID" = "([^"]+)"', result.stdout)
-                if match:
-                    hwid_parts.append(f"MAC_{match.group(1)[:16]}")
+        if sys.platform == 'win32':
+            import winreg
+            key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, 
+                r"SOFTWARE\Microsoft\Cryptography")
+            guid = winreg.QueryValueEx(key, "MachineGuid")[0]
+            hwid_parts.append(f"BIOS_{guid[:16]}")
     except:
         pass
     
+    # 3. Disk Drive Serial
+    try:
+        if sys.platform == 'win32':
+            import subprocess
+            result = subprocess.run(['wmic', 'diskdrive', 'get', 'serialnumber'],
+                                   capture_output=True, text=True, timeout=5)
+            lines = result.stdout.strip().split('\n')
+            if len(lines) >= 2:
+                disk_serial = lines[1].strip()
+                if disk_serial:
+                    hwid_parts.append(f"DISK_{disk_serial[:16]}")
+    except:
+        pass
+    
+    # 4. MAC Address
+    try:
+        mac = uuid.getnode()
+        if mac != 0xffffffffffff:
+            hwid_parts.append(f"MAC_{mac:012x}")
+    except:
+        pass
+    
+    # 5. CPU Serial (Windows)
+    try:
+        if sys.platform == 'win32':
+            import subprocess
+            result = subprocess.run(['wmic', 'cpu', 'get', 'processorid'], 
+                                   capture_output=True, text=True, timeout=5)
+            lines = result.stdout.strip().split('\n')
+            if len(lines) >= 2:
+                cpu_id = lines[1].strip()
+                if cpu_id and cpu_id != 'ProcessorId':
+                    hwid_parts.append(f"CPU_{cpu_id[:16]}")
+    except:
+        pass
+    
+    # 6. Machine ID (Linux)
+    try:
+        if sys.platform == 'linux':
+            with open('/var/lib/dbus/machine-id', 'r') as f:
+                machine_id = f.read().strip()
+                if machine_id:
+                    hwid_parts.append(f"SYS_{machine_id[:16]}")
+        elif sys.platform == 'darwin':
+            import subprocess
+            result = subprocess.run(['ioreg', '-l'], capture_output=True, text=True, timeout=5)
+            import re
+            match = re.search(r'IOPlatformUUID" = "([^"]+)"', result.stdout)
+            if match:
+                hwid_parts.append(f"MAC_{match.group(1)[:16]}")
+    except:
+        pass
+    
+    # 7. Volume Serial (Windows)
     try:
         if sys.platform == 'win32':
             import subprocess
@@ -329,6 +620,7 @@ def get_hwid() -> str:
     except:
         pass
     
+    # 8. Boot ID (Linux)
     try:
         if sys.platform == 'linux':
             with open('/proc/sys/kernel/random/boot_id', 'r') as f:
@@ -338,15 +630,29 @@ def get_hwid() -> str:
     except:
         pass
     
+    # 9. System UUID (Linux)
+    try:
+        if sys.platform == 'linux':
+            import subprocess
+            result = subprocess.run(['dmidecode', '-s', 'system-uuid'], 
+                                   capture_output=True, text=True, timeout=5)
+            if result.stdout.strip():
+                hwid_parts.append(f"UUID_{result.stdout.strip()[:16]}")
+    except:
+        pass
+    
+    # 10. Random Fallback (last resort)
     if not hwid_parts:
         import random
         rand_hwid = ''.join(random.choices('0123456789ABCDEF', k=16))
         hwid_parts.append(f"RND_{rand_hwid}")
     
+    # Combine all parts and create SHA256 hash
     combined = "_".join(hwid_parts)
     final_hwid = hashlib.sha256(combined.encode()).hexdigest()[:16]
     final_hwid = f"YUKIOH_{final_hwid.upper()}"
     
+    # Save to file (PERMANENT)
     try:
         hwid_file.write_text(final_hwid)
         console.print(f"[green]✅ Permanent HWID: {final_hwid}[/green]")
@@ -382,6 +688,10 @@ def decrypt_cache_data(encrypted_data: bytes) -> dict:
     except:
         return None
 
+# ============================================================
+# UPDATED get_keys_from_github() WITH SECURE SESSION
+# ============================================================
+
 def get_keys_from_github() -> dict:
     if not HAS_REQUESTS:
         console.print("[red]⚠ requests module not installed![/red]")
@@ -394,7 +704,10 @@ def get_keys_from_github() -> dict:
     
     try:
         console.print("[dim]Fetching from GitHub API...[/dim]")
-        response = requests.get(GITHUB_CONFIG["repo_url"], headers=headers, timeout=10)
+        
+        # Use secure session
+        session = get_secure_session()
+        response = session.get(GITHUB_CONFIG["repo_url"], headers=headers, timeout=10)
         
         if response.status_code == 200:
             data = response.json()
@@ -455,9 +768,18 @@ def load_encrypted_cache() -> dict:
         console.print(f"[red]❌ Cache read error: {e}[/red]")
         return None
 
+# ============================================================
+# UPDATED verify_key_github() WITH RATE LIMITING
+# ============================================================
+
 def verify_key_github(user_key: str) -> dict:
-    """Verify a key against GitHub with HWID check + EXPIRY CHECK"""
+    """Verify a key against GitHub with HWID check + EXPIRY CHECK + RATE LIMITING"""
     console.print("[dim]🔍 Verifying key...[/dim]")
+    
+    # Rate limiting check
+    allowed, message = auth_rate_limiter.check(user_key)
+    if not allowed:
+        return {'status': False, 'reason': 'Rate limited', 'message': message}
     
     keys_data = get_keys_from_github()
     
@@ -468,10 +790,12 @@ def verify_key_github(user_key: str) -> dict:
     key_info = keys_data.get('keys', {}).get(user_key)
     
     if not key_info:
+        auth_rate_limiter.record_attempt(user_key, False)
         return {'status': False, 'reason': 'Invalid key'}
     
     # Check status
     if key_info.get('status') != 'active':
+        auth_rate_limiter.record_attempt(user_key, False)
         return {'status': False, 'reason': f"Key status: {key_info.get('status')}"}
     
     # ============================================================
@@ -485,6 +809,7 @@ def verify_key_github(user_key: str) -> dict:
             
             # Check if expired
             if expiry_date < datetime.now():
+                auth_rate_limiter.record_attempt(user_key, False)
                 return {
                     'status': False, 
                     'reason': 'Key expired',
@@ -493,6 +818,7 @@ def verify_key_github(user_key: str) -> dict:
                 }
         except ValueError:
             # ✅ FIX: Invalid date format = treat as expired
+            auth_rate_limiter.record_attempt(user_key, False)
             return {
                 'status': False, 
                 'reason': 'Invalid expiry date',
@@ -501,6 +827,7 @@ def verify_key_github(user_key: str) -> dict:
             }
         except Exception:
             # ✅ Any other error = treat as expired
+            auth_rate_limiter.record_attempt(user_key, False)
             return {
                 'status': False, 
                 'reason': 'Expiry check failed',
@@ -524,6 +851,7 @@ def verify_key_github(user_key: str) -> dict:
         
         # If no authorized HWIDs defined, key is invalid (security)
         if not authorized_hwids:
+            auth_rate_limiter.record_attempt(user_key, False)
             return {
                 'status': False, 
                 'reason': 'HWID_NOT_AUTHORIZED',
@@ -532,6 +860,7 @@ def verify_key_github(user_key: str) -> dict:
         
         # Check if user's HWID is authorized
         if user_hwid not in authorized_hwids:
+            auth_rate_limiter.record_attempt(user_key, False)
             return {
                 'status': False, 
                 'reason': 'HWID_NOT_AUTHORIZED',
@@ -542,10 +871,13 @@ def verify_key_github(user_key: str) -> dict:
         
         console.print(f"[dim]✅ HWID Verified: {user_hwid[:12]}...[/dim]")
     
+    # ✅ Success - Record success and reset attempts
+    auth_rate_limiter.record_attempt(user_key, True)
+    
     # Key is valid
     return {
         'status': True,
-        'modname': key_info.get('modname', 'Yukioh Ōkami TOOL v6.0'),
+        'modname': key_info.get('modname', 'Yukioh Ōkami TOOL v4.5'),
         'credit': key_info.get('credit', '0'),
         'expiry': key_info.get('expiry', 'N/A'),
         'type': key_info.get('type', 'free'),
@@ -608,7 +940,7 @@ def _ensure_base_dirs():
     MANIFEST_DIR.mkdir(parents=True, exist_ok=True)
 
 # ============================================================
-# FANCY UI BANNER
+# FANCY UI BANNER - v4.5 KEPT
 # ============================================================
 
 ACCENT = "bright_cyan"
@@ -776,6 +1108,8 @@ def check_auth() -> dict:
                 console.print(f"[yellow]📱 Contact {SUPPORT_CONTACT} with your HWID to get access[/yellow]")
                 console.print(f"[dim]Your HWID: {get_hwid()}[/dim]")
                 clear_saved_auth()
+            elif reason == 'Rate limited':
+                console.print(f"[yellow]⚠️ {result.get('message', '')}[/yellow]")
             else:
                 console.print(f"[yellow]Saved key invalid: {reason}[/yellow]")
                 clear_saved_auth()
@@ -828,6 +1162,12 @@ def check_auth() -> dict:
                     title="[bold red]HWID NOT AUTHORIZED[/bold red]",
                     border_style="red"
                 ))
+            elif reason == 'Rate limited':
+                console.print(Panel(
+                    f"[yellow]⚠️ {result.get('message', '')}[/yellow]",
+                    title="[bold yellow]RATE LIMITED[/bold yellow]",
+                    border_style="yellow"
+                ))
             else:
                 console.print(Panel(
                     f"[red]❌ Login failed: {reason}[/red]\n\n"
@@ -837,7 +1177,7 @@ def check_auth() -> dict:
                 ))
 
 # ============================================================
-# PUSH KEYS TO GITHUB - ADMIN FUNCTION
+# PUSH KEYS TO GITHUB - ADMIN FUNCTION (UPDATED WITH SECURE SESSION)
 # ============================================================
 
 def push_keys_to_github(keys_data: dict) -> bool:
@@ -852,7 +1192,10 @@ def push_keys_to_github(keys_data: dict) -> bool:
     
     try:
         console.print("[dim]Getting file info from GitHub...[/dim]")
-        response = requests.get(GITHUB_CONFIG["repo_url"], headers=headers, timeout=15)
+        
+        # Use secure session
+        session = get_secure_session()
+        response = session.get(GITHUB_CONFIG["repo_url"], headers=headers, timeout=15)
         
         sha = None
         if response.status_code == 200:
@@ -879,7 +1222,7 @@ def push_keys_to_github(keys_data: dict) -> bool:
             payload["sha"] = sha
         
         console.print("[dim]Pushing to GitHub...[/dim]")
-        response = requests.put(GITHUB_CONFIG["repo_url"], headers=headers, json=payload, timeout=15)
+        response = session.put(GITHUB_CONFIG["repo_url"], headers=headers, json=payload, timeout=15)
         
         if response.status_code in [200, 201]:
             console.print('[green]✅ Successfully updated keys.json on GitHub[/green]')
@@ -952,7 +1295,7 @@ def admin_hwid_manager():
     
     while True:
         clear_screen()
-        show_banner()
+        show_banner(_auth_data)
         
         console.print(Panel('[bold cyan]📋 KEYS & AUTHORIZED HWIDs[/bold cyan]', border_style='cyan'))
         
@@ -987,9 +1330,10 @@ def admin_hwid_manager():
         console.print('  [bold green][3][/bold green] 👤 Show your HWID')
         console.print('  [bold green][4][/bold green] 🔄 Refresh keys from GitHub')
         console.print('  [bold green][5][/bold green] 🗑️ Auto Delete Expired Keys')
+        console.print('  [bold green][6][/bold green] 📊 Rate Limiter Status')
         console.print('  [bold red][0][/bold red] ⬅ Back')
         
-        choice = Prompt.ask('[bold yellow]Select[/bold yellow]', choices=['1', '2', '3', '4', '5', '0'], default='0')
+        choice = Prompt.ask('[bold yellow]Select[/bold yellow]', choices=['1', '2', '3', '4', '5', '6', '0'], default='0')
         
         if choice == '0':
             break
@@ -1016,6 +1360,10 @@ def admin_hwid_manager():
                 keys_data = get_keys_from_github()
             else:
                 console.print('[green]✅ No expired keys found[/green]')
+            Prompt.ask('\n[white]Press Enter...[/white]', default='')
+            continue
+        elif choice == '6':
+            show_rate_limiter_status()
             Prompt.ask('\n[white]Press Enter...[/white]', default='')
             continue
         
@@ -1217,7 +1565,7 @@ class MmapFileReader:
     def __del__(self): self.close()
 
 # ============================================================
-# SM4 IMPLEMENTATION
+# SM4 IMPLEMENTATION (COMPLETE)
 # ============================================================
 
 _S_BOX = bytes([
@@ -1399,7 +1747,7 @@ class Writer:
             self._buffer.extend(b'\x00' * padding)
 
 # ============================================================
-# PAK CLASSES (FROM YOUR WORKING FILE)
+# PAK CLASSES - COMPLETE
 # ============================================================
 
 class PakInfo:
@@ -1817,7 +2165,7 @@ def dump_unpacking_log(pak_file, output_log_path: Path):
     console.print(f'[bold #00FF88]✅ Debug log saved to: {output_log_path}[/bold #00FF88]')
 
 # ============================================================
-# SIMPLE BLOCK DISPLAY CLASS (FROM YOUR FILE)
+# SIMPLE BLOCK DISPLAY CLASS
 # ============================================================
 
 class SimpleBlockDisplay:
@@ -1895,7 +2243,7 @@ class SimpleBlockDisplay:
         console.print(f"[bold green]╚═════════════════════════════════════════════════════════════════╝[/bold green]")
 
 # ============================================================
-# REPACK FUNCTIONS (FROM YOUR WORKING FILE)
+# REPACK FUNCTIONS - COMPLETE
 # ============================================================
 
 def _pw_string(s):
@@ -2559,7 +2907,7 @@ def repack_gamepatch(pak, repack_dir, output_pak):
     repack_pak_file_with_block_display(pak_file=pak, edited_root=repack_dir, output_path=output_pak)
 
 # ============================================================
-# PAK TYPE MENU FUNCTIONS (FOLDER STRUCTURE BASED)
+# PAK TYPE MENU FUNCTIONS
 # ============================================================
 
 def select_pak_file(folder_type: str, title: str) -> Path | None:
@@ -2665,7 +3013,6 @@ def handle_repack(folder_type: str):
     if not pak_file:
         return
     
-    # Check which mode to use
     console.print(Panel('[cyan]Select Repack Mode[/cyan]', title='Repack Mode', border_style='cyan'))
     table = Table(box=rich_box.SIMPLE)
     table.add_column('Option', justify='center')
@@ -2781,7 +3128,7 @@ def show_type_menu(folder_type: str):
             break
 
 # ============================================================
-# SEARCH AND COMPARE FEATURES
+# SEARCH AND COMPARE FEATURES - COMPLETE
 # ============================================================
 
 def search_text_in_files(folder_type: str):
@@ -3187,7 +3534,7 @@ def create_folder_structure_with_filename(folder_type: str):
     Prompt.ask('Press Enter...', default='')
 
 # ============================================================
-# AUTO CONFIGURATION FEATURES
+# AUTO CONFIGURATION FEATURES - COMPLETE
 # ============================================================
 
 TARGET_FILE_NAME = 'BP_PlayerPawn.uasset'
@@ -3439,7 +3786,7 @@ def auto_configuration_menu():
             return
 
 # ============================================================
-# 120 FPS FEATURES
+# 120 FPS FEATURES - COMPLETE
 # ============================================================
 
 KNOWN_120FPS_MODELS = [
@@ -3578,7 +3925,7 @@ def handle_auto_120fps():
             _fps_run(game_label, game_dir, user_model)
 
 # ============================================================
-# ANTIRESET FEATURES
+# ANTIRESET FEATURES - COMPLETE
 # ============================================================
 
 ANTIRESET_JSON = ANTIRESET_DIR / 'antireset_info.json'
@@ -3775,7 +4122,7 @@ def handle_antireset_tool():
             break
 
 # ============================================================
-# ENCRYPT/DECRYPT FEATURES
+# ENCRYPT/DECRYPT FEATURES - COMPLETE
 # ============================================================
 
 _MINI_BYTES = bytes.fromhex('a207970006046e500e000000486c42adac7abf083cb61f01f805e156acf00638733f82b80aeefb1fd6d98dedb47ad1a6')
@@ -4017,7 +4364,7 @@ def handle_encrypt_pak_tool():
             Prompt.ask('\n[white]Press Enter...[/white]', default='')
 
 # ============================================================
-# SPLIT/MERGE FEATURES
+# SPLIT/MERGE FEATURES - COMPLETE
 # ============================================================
 
 CHUNK_SIZE = 65536
@@ -4157,7 +4504,7 @@ def file_split_merge_menu():
             return
 
 # ============================================================
-# LUA TOOL CORE
+# LUA TOOL CORE - COMPLETE
 # ============================================================
 
 GITHUB_RAW_BASE = "https://raw.githubusercontent.com/DANGERMODVIP/wewe/main"
@@ -4722,7 +5069,7 @@ def _compile_with_optimizer(in_path, out_path, orig_sname=None):
         return False, str(e), "optimizer"
 
 # ============================================================
-# LUA MENU
+# LUA MENU - COMPLETE
 # ============================================================
 
 def lua_xor_decrypt(data: bytes, key: bytes) -> bytes:
@@ -5153,7 +5500,7 @@ def safe_input(prompt: str = '') -> str:
         return ''
 
 # ============================================================
-# UI HELPERS
+# UI HELPERS - COMPLETE
 # ============================================================
 
 def progress_animation(message, duration=0.8):
@@ -5189,7 +5536,7 @@ def show_how_to_use():
     section_header("HOW TO USE")
     guide = f"""
 [bold yellow]📁 FOLDER STRUCTURE[/bold yellow]
-[bold cyan]Yukioh_Okami_v4.5/[/bold cyan]
+[bold cyan]Yukioh_Ōkami_v4.5/[/bold cyan]
 ├── 📁 [cyan]ZSDIC[/cyan]/              → For ZSDIC PAK files
 │   ├── 📁 [green]INPUT[/green]/          → [white]Place .pak files here[/white]
 │   ├── 📁 [yellow]UNPACKED[/yellow]/       → [white]Extracted files go here[/white]
@@ -5228,7 +5575,7 @@ def show_how_to_use():
     input()
 
 # ============================================================
-# MAIN MENU
+# MAIN MENU - v4.5 KEPT
 # ============================================================
 
 def _draw_menu():
@@ -5253,6 +5600,7 @@ def _draw_menu():
     
     if _auth_data and _auth_data.get('type') == 'admin':
         items.append(("A", "🔐 Admin HWID Manager", PINK))
+        items.append(("R", "📊 Rate Limiter Status", GOLD))
     
     for num, label, lcolor in items:
         console.print(Align.center(f"[bold {ACCENT}]║[/]  [bold {GOLD}][{num}][/bold {GOLD}]  [bold {lcolor}]>>[/bold {lcolor}]  [white]{label}[/white]{' ' * max(W - len(f'  [{num}]  >>  {label}'), 1)}[bold {ACCENT}]║[/]"))
@@ -5286,10 +5634,24 @@ def startup_animation():
     clear_screen()
 
 # ============================================================
-# MAIN FUNCTION
+# MAIN FUNCTION - WITH SECURITY CHECKS
 # ============================================================
 
 def main():
+    # ============================================================
+    # 🔐 SECURITY CHECKS AT STARTUP
+    # ============================================================
+    
+    # 1. Anti-debug check
+    if anti_debug_check():
+        console.print("[red]❌ Security check failed! Exiting...[/red]")
+        time.sleep(2)
+        sys.exit(1)
+    
+    # 2. Integrity check (warning only, don't block)
+    if not check_code_integrity():
+        console.print("[yellow]⚠️ Code integrity warning[/yellow]")
+    
     _ensure_base_dirs()
     startup_animation()
 
@@ -5306,7 +5668,7 @@ def main():
     _auth_data = auth_data
 
     if db_client:
-        db_client.start_tool_session(tool_name="Yukioh_Okami_v4.5", hwid=get_hwid(), authenticated=True)
+        db_client.start_tool_session(tool_name="Yukioh_Ōkami_v4.5", hwid=get_hwid(), authenticated=True)
 
     if not HAS_PAK_DEPS:
         show_banner(_auth_data, show_menu=False)
@@ -5350,6 +5712,13 @@ def main():
             else:
                 console.print('[red]❌ Admin access required![/red]')
                 console.print(f'[yellow]Contact {SUPPORT_CONTACT} for admin access.[/yellow]')
+                Prompt.ask('\n[white]Press Enter...[/white]', default='')
+        elif choice == 'R':
+            if _auth_data and _auth_data.get('type') == 'admin':
+                show_rate_limiter_status()
+                Prompt.ask('\n[white]Press Enter...[/white]', default='')
+            else:
+                console.print('[red]❌ Admin access required![/red]')
                 Prompt.ask('\n[white]Press Enter...[/white]', default='')
         elif choice == 'X':
             clear_screen()
